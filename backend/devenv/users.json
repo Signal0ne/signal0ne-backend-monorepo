@@ -1,0 +1,9 @@
+[{
+    "_id": "65ef8115064d3a298f73aa0f",
+    "userId": "162910679",
+    "userName": "SignalTest",
+    "isPro": false,
+    "agentBearerToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTAxOTQ5NjUsImlkIjoiMTYyOTEwNjc5IiwidXNlck5hbWUiOiJTaWduYWxUZXN0In0.h4go1qQOiuiGG1_9EJAg2cH2CZEk233sluWnwTaFPD8",
+    "counter": 0,
+    "type": "github"
+  }]
