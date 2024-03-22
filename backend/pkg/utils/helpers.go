@@ -66,12 +66,7 @@ func CompareLogs(incomingLogTails []string, currentIssuesLogTails []string) (isN
 	for _, incomingLogTail := range incomingLogTails {
 		for _, currentIssueLogTail := range currentIssuesLogTails {
 			similarity := strutil.Similarity(incomingLogTail, currentIssueLogTail, sdm)
-			fmt.Print("-----------------------\n")
-			fmt.Print("Incoming Log Tail: ", incomingLogTail, "\n")
-			fmt.Print("Current Issue Log Tail: ", currentIssueLogTail, "\n")
-			fmt.Print("Similarity: ", similarity, "\n")
-			fmt.Print("Is New Issue: ", (similarity <= LogSimilarityThreshold), "\n")
-			fmt.Print("-----------------------\n")
+			fmt.Printf("Similarity: %f\n", similarity)
 			if similarity >= LogSimilarityThreshold {
 				isNewIssue = false
 				return
