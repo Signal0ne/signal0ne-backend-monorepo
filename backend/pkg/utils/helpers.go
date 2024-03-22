@@ -142,3 +142,38 @@ func PasswordValidation(password string) bool {
 	}
 	return (hasUpper && hasLower && hasDigit)
 }
+
+func AnonymizePII(data string) string {
+	const EmailRegex = `(?i)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})`
+	const PhoneRegex = `(?i)(\+?(\d{1,3})?[\s.-]?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4})`
+	const CreditCardRegex = `(?i)(\b(?:\d[ -]*?){13,16}\b)`
+
+	compiledEmailRegex := regexp.MustCompile(EmailRegex)
+	compiledPhoneRegex := regexp.MustCompile(PhoneRegex)
+	compiledCreditCardRegex := regexp.MustCompile(CreditCardRegex)
+
+	data = compiledEmailRegex.ReplaceAllString(data, "[email]")
+	data = compiledPhoneRegex.ReplaceAllString(data, "[phone]")
+	data = compiledCreditCardRegex.ReplaceAllString(data, "[credit card]")
+
+	return data
+}
+
+func MaskSecrets(data string) string {
+	// const PasswordRegex = `(?i)(\b[A-Za-z0-9]{8,}\b)`
+	const BearerTokenRegex = `(?i)(\bBearer\s[A-Za-z0-9]{8,}\b)`
+	const BasicAuthRegex = `(?i)(\bBasic\s[A-Za-z0-9]{8,}\b)`
+	const JWTRegex = `(?i)(\b[A-Za-z0-9]{8,}\.[A-Za-z0-9]{8,}\.[A-Za-z0-9]{8,}\b)`
+
+	// compiledPasswordRegex := regexp.MustCompile(PasswordRegex)
+	compiledBearerTokenRegex := regexp.MustCompile(BearerTokenRegex)
+	compiledBasicAuthRegex := regexp.MustCompile(BasicAuthRegex)
+	compiledJWTRegex := regexp.MustCompile(JWTRegex)
+
+	// data = compiledPasswordRegex.ReplaceAllString(data, "[REDUCTED]")
+	data = compiledBearerTokenRegex.ReplaceAllString(data, "[REDUCTED]")
+	data = compiledBasicAuthRegex.ReplaceAllString(data, "[REDUCTED]")
+	data = compiledJWTRegex.ReplaceAllString(data, "[REDUCTED]")
+
+	return data
+}
