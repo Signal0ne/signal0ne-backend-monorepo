@@ -187,6 +187,9 @@ func (c *MainController) LogAnalysisTask(ctx *gin.Context) {
 		var issueLog Log
 		var isNewIssue = true
 
+		logAnalysisPayload.Logs = utils.AnonymizePII(logAnalysisPayload.Logs)
+		logAnalysisPayload.Logs = utils.MaskSecrets(logAnalysisPayload.Logs)
+
 		formattedAnalysisLogs := strings.Split(logAnalysisPayload.Logs, "\n")
 		formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
 
