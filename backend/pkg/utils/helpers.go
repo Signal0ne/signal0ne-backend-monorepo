@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -66,7 +65,6 @@ func CompareLogs(incomingLogTails []string, currentIssuesLogTails []string) (isN
 	for _, incomingLogTail := range incomingLogTails {
 		for _, currentIssueLogTail := range currentIssuesLogTails {
 			similarity := strutil.Similarity(incomingLogTail, currentIssueLogTail, sdm)
-			fmt.Printf("Similarity: %f\n", similarity)
 			if similarity >= LogSimilarityThreshold {
 				isNewIssue = false
 				return
