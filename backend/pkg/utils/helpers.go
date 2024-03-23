@@ -160,17 +160,17 @@ func AnonymizePII(data string) string {
 }
 
 func MaskSecrets(data string) string {
-	// const PasswordRegex = `(?i)(\b[A-Za-z0-9]{8,}\b)`
+	const PasswordRegex = `(?i)(\bpassword\s*=\s*[A-Za-z0-9]{8,}\b)`
 	const BearerTokenRegex = `(?i)(\bBearer\s[A-Za-z0-9]{8,}\b)`
 	const BasicAuthRegex = `(?i)(\bBasic\s[A-Za-z0-9]{8,}\b)`
 	const JWTRegex = `(?i)(\b[A-Za-z0-9]{8,}\.[A-Za-z0-9]{8,}\.[A-Za-z0-9]{8,}\b)`
 
-	// compiledPasswordRegex := regexp.MustCompile(PasswordRegex)
+	compiledPasswordRegex := regexp.MustCompile(PasswordRegex)
 	compiledBearerTokenRegex := regexp.MustCompile(BearerTokenRegex)
 	compiledBasicAuthRegex := regexp.MustCompile(BasicAuthRegex)
 	compiledJWTRegex := regexp.MustCompile(JWTRegex)
 
-	// data = compiledPasswordRegex.ReplaceAllString(data, "[REDUCTED]")
+	data = compiledPasswordRegex.ReplaceAllString(data, "[REDUCTED]")
 	data = compiledBearerTokenRegex.ReplaceAllString(data, "[REDUCTED]")
 	data = compiledBasicAuthRegex.ReplaceAllString(data, "[REDUCTED]")
 	data = compiledJWTRegex.ReplaceAllString(data, "[REDUCTED]")
