@@ -238,9 +238,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/issues/resolve/{id}": {
+        "/issues/report": {
             "post": {
-                "description": "Resolve an issue by providing its ID and updating its status to resolved.",
                 "consumes": [
                     "application/json"
                 ],
@@ -250,33 +249,27 @@ const docTemplate = `{
                 "tags": [
                     "issues"
                 ],
-                "summary": "Resolve an issue by setting its status to resolved.",
+                "summary": "Report issue analysis done by the user if the prediction was incorrect or harmful.",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "ID of the issue to be resolved",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Report request",
+                        "name": "reportRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.IssueAnalysisReportRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/models.IssueAnalysisReportResponse"
                         }
                     },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -323,16 +316,69 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/issues/{id}/resolve": {
+            "put": {
+                "description": "Resolve an issue by providing its ID and resolve state of the issue.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "issues"
+                ],
+                "summary": "Mark issue as resolved/unresolved.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the issue to be resolved",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "controllers.LogAnalysisPayload": {
             "type": "object",
             "properties": {
+                "containerId": {
+                    "type": "string"
+                },
                 "containerName": {
                     "type": "string"
                 },
                 "logs": {
+                    "type": "string"
+                },
+                "severity": {
                     "type": "string"
                 },
                 "userId": {
@@ -343,6 +389,9 @@ const docTemplate = `{
         "models.Issue": {
             "type": "object",
             "properties": {
+                "containerId": {
+                    "type": "string"
+                },
                 "containerName": {
                     "type": "string"
                 },
@@ -355,17 +404,23 @@ const docTemplate = `{
                 "issuePredictedSolutionsSources": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.IssueSolutionPredictionSolutionSource"
+                        "type": "string"
                     }
                 },
                 "logSummary": {
                     "type": "string"
                 },
                 "logs": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "predictedSolutionsSummary": {
                     "type": "string"
+                },
+                "score": {
+                    "type": "integer"
                 },
                 "severity": {
                     "type": "string"
@@ -381,14 +436,28 @@ const docTemplate = `{
                 }
             }
         },
-        "models.IssueSolutionPredictionSolutionSource": {
+        "models.IssueAnalysisReportRequest": {
             "type": "object",
             "properties": {
-                "title": {
+                "delete": {
+                    "type": "boolean"
+                },
+                "issueId": {
                     "type": "string"
                 },
-                "url": {
+                "reason": {
                     "type": "string"
+                }
+            }
+        },
+        "models.IssueAnalysisReportResponse": {
+            "type": "object",
+            "properties": {
+                "acknowledged": {
+                    "type": "boolean"
+                },
+                "deleted": {
+                    "type": "boolean"
                 }
             }
         }
