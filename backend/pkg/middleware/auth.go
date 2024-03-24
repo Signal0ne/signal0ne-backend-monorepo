@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"net/http"
-	"signalone/pkg/controllers"
+	"signalone/pkg/utils"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +13,7 @@ func CheckAuthorization(ctx *gin.Context) {
 
 	var jwtToken = strings.TrimPrefix(authHeader, "Bearer ")
 
-	_, err := controllers.VerifyToken(jwtToken)
+	_, err := utils.VerifyToken(jwtToken)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		ctx.Abort()
