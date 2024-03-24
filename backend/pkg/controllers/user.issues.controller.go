@@ -202,9 +202,7 @@ func (c *UserIssuesController) RateIssue(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userId": userId})
-
-	err = userResult.Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -300,9 +298,7 @@ func (c *UserIssuesController) RegenerateSolution(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userId": userId})
-
-	err = userResult.Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
 	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return

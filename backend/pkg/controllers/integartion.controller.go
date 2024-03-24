@@ -62,13 +62,12 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userId": logAnalysisPayload.UserId})
-	err := userResult.Decode(&user)
+
+	err := utils.GetUser(ctx, c.usersCollection, bson.M{"userId": logAnalysisPayload.UserId}, &user)
 	if err != nil {
-		fmt.Printf("Error: %s", err)
-		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+
 	issueId := uuid.New().String()
 	go func() {
 		var issueLogs = make([]string, 0)

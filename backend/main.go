@@ -105,8 +105,8 @@ func main() {
 	)
 
 	integrationAuthController := controllers.NewIntegrationAuthController(
+		issuesCollectionClient,
 		usersCollectionClient,
-		savedAnalysisCollectionClient,
 		savedAnalysisCollectionClient,
 	)
 

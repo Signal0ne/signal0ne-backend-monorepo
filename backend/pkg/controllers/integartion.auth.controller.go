@@ -40,11 +40,8 @@ func (c *IntegrationAuthController) AuthenticateAgent(ctx *gin.Context) {
 		return
 	}
 
-	result := c.usersCollection.FindOne(ctx, bson.M{"userId": userId})
-	err = result.Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
 	if err != nil {
-		fmt.Printf("Error: %s", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -113,7 +110,7 @@ func (c *IntegrationAuthController) VerifyAgentToken(ctx *gin.Context, token str
 		return
 	}
 
-	err = c.usersCollection.FindOne(ctx, bson.M{"userId": claims.Id}).Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": claims.Id}, &user)
 	if err != nil {
 		return
 	}

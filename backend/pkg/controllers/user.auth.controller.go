@@ -47,9 +47,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userId": strconv.Itoa(userData.Id)})
-
-	err = userResult.Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
 
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -108,15 +106,11 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userId": claims.Subject})
-
-	err = userResult.Decode(&user)
-
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": claims.Subject}, &user)
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
 	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
 		user = models.User{
 			UserId:           claims.Subject,
@@ -165,9 +159,7 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 
 	loginData.Email = strings.ToLower(loginData.Email)
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userName": loginData.Email, "type": "signalone"})
-
-	err := userResult.Decode(&user)
+	err := utils.GetUser(ctx, c.usersCollection, bson.M{"userName": loginData.Email, "type": "signalone"}, &user)
 	if err == mongo.ErrNoDocuments {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"descriptionKey": "INVALID_CREDENTIALS"})
 		return
@@ -223,14 +215,11 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userName": loginData.Email, "type": "signalone"})
-
-	err := userResult.Decode(&user)
+	err := utils.GetUser(ctx, c.usersCollection, bson.M{"userName": loginData.Email, "type": "signalone"}, &user)
 	if err != nil && err != mongo.ErrNoDocuments {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
 	}
-
 	if err == nil {
 		if !user.EmailConfirmed {
 			ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "DUPLICATE_NOT_CONFIRMED_USER_EMAIL"})
@@ -312,9 +301,7 @@ func (c *UserAuthController) VerifyEmail(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"emailConfirmationCode": verificationData.ConfirmationToken})
-
-	err = userResult.Decode(&user)
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"emailConfirmationCode": verificationData.ConfirmationToken}, &user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "INVALID_VERIFICATION_CODE"})
 		return
@@ -347,9 +334,7 @@ func (c *UserAuthController) ResendConfirmationEmail(ctx *gin.Context) {
 		return
 	}
 
-	userResult := c.usersCollection.FindOne(ctx, bson.M{"userName": verificationData.Email})
-
-	err := userResult.Decode(&user)
+	err := utils.GetUser(ctx, c.usersCollection, bson.M{"userName": verificationData.Email}, &user)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "EMAIL_NOT_FOUND"})
 		return
