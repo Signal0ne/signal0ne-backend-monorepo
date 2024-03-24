@@ -149,7 +149,7 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 }
 
 func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
-	var loginData models.SignalAccountPayload
+	var loginData models.SignalAccountRequest
 	var user models.User
 
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
@@ -200,7 +200,7 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 }
 
 func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
-	var loginData models.SignalAccountPayload
+	var loginData models.SignalAccountRequest
 	var user models.User
 
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
@@ -288,7 +288,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 
 func (c *UserAuthController) VerifyEmail(ctx *gin.Context) {
 	var user models.User
-	var verificationData models.EmailConfirmationPayload
+	var verificationData models.EmailConfirmationRequest
 
 	if err := ctx.ShouldBindJSON(&verificationData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "ERROR_OCCURED"})

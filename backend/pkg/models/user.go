@@ -16,12 +16,12 @@ type User struct {
 	EmailConfirmationCode string `json:"emailConfirmationCode" bson:"emailConfirmationCode"`
 }
 
-type SignalAccountPayload struct {
+type SignalAccountRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type EmailConfirmationPayload struct {
+type EmailConfirmationRequest struct {
 	Email             string `json:"email"`
 	ConfirmationToken string `json:"confirmationToken"`
 }
