@@ -87,7 +87,23 @@ func main() {
 		emailClientData,
 	)
 
-	//authController TBD
+	userAuthController := controllers.NewUserAuthController(
+		usersCollectionClient,
+		emailClientData,
+	)
+
+	integrationController := controllers.NewIntegrationController(
+		issuesCollectionClient,
+		usersCollectionClient,
+		savedAnalysisCollectionClient,
+	)
+
+	integrationAuthController := controllers.NewIntegrationAuthController(
+		usersCollectionClient,
+		savedAnalysisCollectionClient,
+		savedAnalysisCollectionClient,
+	)
+
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"*"}
 	corsConfig.AllowHeaders = []string{"*"}
@@ -101,7 +117,8 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
-	routeController := routers.NewMainRouter(mainController)
+	routeController := routers.NewMainRouter(mainController, userAuthController,
+		integrationController, integrationAuthController)
 	routeController.RegisterRoutes(router)
 
 	if cfg.Mode == "local" {

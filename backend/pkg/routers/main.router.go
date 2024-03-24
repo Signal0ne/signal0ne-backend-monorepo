@@ -8,12 +8,21 @@ import (
 )
 
 type MainRouter struct {
-	mainController *controllers.MainController
+	mainController            *controllers.MainController
+	userAuthController        *controllers.UserAuthController
+	integrationController     *controllers.IntegrationController
+	integrationAuthController *controllers.IntegrationAuthController
 }
 
-func NewMainRouter(mainController *controllers.MainController) *MainRouter {
+func NewMainRouter(mainController *controllers.MainController,
+	userAuthController *controllers.UserAuthController,
+	integrationController *controllers.IntegrationController,
+	integartionAuthController *controllers.IntegrationAuthController) *MainRouter {
 	return &MainRouter{
-		mainController: mainController,
+		mainController:            mainController,
+		userAuthController:        userAuthController,
+		integrationController:     integrationController,
+		integrationAuthController: integartionAuthController,
 	}
 }
 
@@ -22,17 +31,17 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("/waitlist", mr.mainController.WaitlistHandler)
 
 	authorizationRouterGroup := rg.Group("/auth")
-	authorizationRouterGroup.POST("/email-confirmation", mr.mainController.VerifyEmail)
-	authorizationRouterGroup.POST("/email-confirmation-link-resend", mr.mainController.ResendConfirmationEmail)
-	authorizationRouterGroup.POST("/login", mr.mainController.LoginHandler)
-	authorizationRouterGroup.POST("/login-with-github", mr.mainController.LoginWithGithubHandler)
-	authorizationRouterGroup.POST("/login-with-google", mr.mainController.LoginWithGoogleHandler)
-	authorizationRouterGroup.POST("/register", mr.mainController.RegisterHandler)
-	authorizationRouterGroup.POST("/token/refresh", mr.mainController.RefreshTokenHandler)
+	authorizationRouterGroup.POST("/email-confirmation", mr.userAuthController.VerifyEmail)
+	authorizationRouterGroup.POST("/email-confirmation-link-resend", mr.userAuthController.ResendConfirmationEmail)
+	authorizationRouterGroup.POST("/login", mr.userAuthController.LoginHandler)
+	authorizationRouterGroup.POST("/login-with-github", mr.userAuthController.LoginWithGithubHandler)
+	authorizationRouterGroup.POST("/login-with-google", mr.userAuthController.LoginWithGoogleHandler)
+	authorizationRouterGroup.POST("/register", mr.userAuthController.RegisterHandler)
+	authorizationRouterGroup.POST("/token/refresh", mr.userAuthController.RefreshTokenHandler)
 
 	userRouterGroup := rg.Group("/user", middlewares.CheckAuthorization)
 	{
-		userRouterGroup.POST("/agent/authenticate", mr.mainController.AuthenticateAgent)
+		userRouterGroup.POST("/agent/authenticate", mr.integrationAuthController.AuthenticateAgent)
 		userRouterGroup.GET("/containers", mr.mainController.GetContainers)
 		userRouterGroup.GET("/issues", mr.mainController.IssuesSearch)
 		userRouterGroup.GET("/issues/:id", mr.mainController.GetIssue)
@@ -43,9 +52,9 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
 	}
 
-	agentRouterGroup := rg.Group("/agent", mr.mainController.CheckAgentAuthorization)
+	agentRouterGroup := rg.Group("/agent", mr.integrationAuthController.CheckAgentAuthorization)
 	{
-		agentRouterGroup.DELETE("/issues/:containerId", mr.mainController.DeleteIssues)
-		agentRouterGroup.PUT("/issues/analysis", mr.mainController.LogAnalysisTask)
+		agentRouterGroup.DELETE("/issues/:containerId", mr.integrationController.DeleteIssues)
+		agentRouterGroup.PUT("/issues/analysis", mr.integrationController.LogAnalysisTask)
 	}
 }
