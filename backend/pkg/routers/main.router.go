@@ -10,17 +10,20 @@ import (
 type MainRouter struct {
 	mainController            *controllers.MainController
 	userAuthController        *controllers.UserAuthController
+	userIssuesController      *controllers.UserIssuesController
 	integrationController     *controllers.IntegrationController
 	integrationAuthController *controllers.IntegrationAuthController
 }
 
 func NewMainRouter(mainController *controllers.MainController,
 	userAuthController *controllers.UserAuthController,
+	userIssuesController *controllers.UserIssuesController,
 	integrationController *controllers.IntegrationController,
 	integartionAuthController *controllers.IntegrationAuthController) *MainRouter {
 	return &MainRouter{
 		mainController:            mainController,
 		userAuthController:        userAuthController,
+		userIssuesController:      userIssuesController,
 		integrationController:     integrationController,
 		integrationAuthController: integartionAuthController,
 	}
@@ -42,12 +45,12 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	userRouterGroup := rg.Group("/user", middlewares.CheckAuthorization)
 	{
 		userRouterGroup.POST("/agent/authenticate", mr.integrationAuthController.AuthenticateAgent)
-		userRouterGroup.GET("/containers", mr.mainController.GetContainers)
-		userRouterGroup.GET("/issues", mr.mainController.IssuesSearch)
-		userRouterGroup.GET("/issues/:id", mr.mainController.GetIssue)
-		userRouterGroup.PUT("/issues/:id/regenerate", mr.mainController.RegenerateSolution)
-		userRouterGroup.PUT("/issues/:id/resolve", mr.mainController.ResolveIssue)
-		userRouterGroup.PUT("/issues/:id/score", mr.mainController.RateIssue)
+		userRouterGroup.GET("/containers", mr.userIssuesController.GetContainers)
+		userRouterGroup.GET("/issues", mr.userIssuesController.IssuesSearch)
+		userRouterGroup.GET("/issues/:id", mr.userIssuesController.GetIssue)
+		userRouterGroup.PUT("/issues/:id/regenerate", mr.userIssuesController.RegenerateSolution)
+		userRouterGroup.PUT("/issues/:id/resolve", mr.userIssuesController.ResolveIssue)
+		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
 	}
