@@ -450,7 +450,13 @@ func (c *UserIssuesController) ReportIssueAnalysis(ctx *gin.Context) {
 		return
 	}
 
-	c.reportsCollection.InsertOne(ctx, reportRequest)
+	c.reportsCollection.InsertOne(ctx, bson.M{
+		"userId":   userId,
+		"issueId":  reportRequest.IssueId,
+		"reason":   reportRequest.Reason,
+		"reported": time.Now(),
+		"delete":   reportRequest.Delete,
+	})
 
 	if reportRequest.Delete {
 		_, err = c.issuesCollection.DeleteOne(ctx, bson.M{"_id": reportRequest.IssueId, "userId": userId})
