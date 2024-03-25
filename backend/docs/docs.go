@@ -439,14 +439,14 @@ const docTemplate = `{
         "models.IssueAnalysisReportRequest": {
             "type": "object",
             "properties": {
-                "delete": {
-                    "type": "boolean"
-                },
                 "issueId": {
                     "type": "string"
                 },
                 "reason": {
                     "type": "string"
+                },
+                "shouldDelete": {
+                    "type": "boolean"
                 }
             }
         },

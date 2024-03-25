@@ -48,12 +48,12 @@ definitions:
     type: object
   models.IssueAnalysisReportRequest:
     properties:
-      delete:
-        type: boolean
       issueId:
         type: string
       reason:
         type: string
+      shouldDelete:
+        type: boolean
     type: object
   models.IssueAnalysisReportResponse:
     properties:
