@@ -8,9 +8,9 @@ type IssueAnalysis struct {
 }
 
 type IssueAnalysisReportRequest struct {
-	IssueId string `json:"issueId" bson:"_id"`
-	Reason  string `json:"reason" bson:"reason"`
-	Delete  bool   `json:"delete" bson:"delete"`
+	IssueId      string `json:"issueId" bson:"_id"`
+	Reason       string `json:"reason" bson:"reason"`
+	ShouldDelete bool   `json:"shouldDelete" bson:"shouldDelete"`
 }
 
 type IssueAnalysisReportResponse struct {

@@ -455,10 +455,10 @@ func (c *UserIssuesController) ReportIssueAnalysis(ctx *gin.Context) {
 		"issueId":  reportRequest.IssueId,
 		"reason":   reportRequest.Reason,
 		"reported": time.Now(),
-		"delete":   reportRequest.Delete,
+		"delete":   reportRequest.ShouldDelete,
 	})
 
-	if reportRequest.Delete {
+	if reportRequest.ShouldDelete {
 		_, err = c.issuesCollection.DeleteOne(ctx, bson.M{"_id": reportRequest.IssueId, "userId": userId})
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -468,6 +468,6 @@ func (c *UserIssuesController) ReportIssueAnalysis(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, models.IssueAnalysisReportResponse{
 		Acknowledged: true,
-		Deleted:      reportRequest.Delete,
+		Deleted:      reportRequest.ShouldDelete,
 	})
 }
