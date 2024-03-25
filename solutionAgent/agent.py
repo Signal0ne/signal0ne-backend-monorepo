@@ -76,7 +76,7 @@ class ChatAgent:
             answer = ".".join(answer_sentences)
         return answer
 
-    def master_agent(self,summary):
+    def master_agent(self,logs):
         """Function to find solutions to the logs using summary and web search
         Args:
             summary (str): summary of the logs
@@ -84,7 +84,7 @@ class ChatAgent:
 
         answer =  self.agent_executor.invoke({"input":f"""You are a software developer who has to provide short summary of available solutions to issues of a software.
                                      Use websearch tool available to make your answer. You can ask multiple questions from the webagent . Use "websearch" agent to search about information use "Action: websearch" . You can use the summary provided. Also provide the sources of your solutions.
-                                     Here is the summary of issue for which you need to find solution and provide code or commands if it would help to resolve issue: \n {summary}"""})
+                                     Here are the logs of issue for which you need to find solution and provide code or commands if it would help to resolve issue: \n {logs}"""})
         return answer['intermediate_steps']
     
     def extract_urls(self,logs, urls):
@@ -131,9 +131,10 @@ class ChatAgent:
             container_name (str): container name of the user
         Returns: json object"""
         summary = self.understand_logs(logs)
-        urls = self.master_agent(summary)
-        sol = self.llm(f'''Use this information to provide solutions to the issue summary: {summary}.
-                       \n Here are the intermediate steps for you to use as in information source: {urls}
+        urls = self.master_agent(logs)
+        sol = self.llm(f'''You are sofware engineer. Provide solutions to the issue.
+                       \n Here are the intermediate steps for you to use as in information source to propose issue solutions: {urls}
+                       Issues solutions should not suggest silencing the error or warning.
                        Provide just solutions anything else will be punished.
                        Do not prompt user to search anything in web or ask support or you will be punished.
                        Do not assume anything that is not there in the intermediate steps and give a proper answer.
