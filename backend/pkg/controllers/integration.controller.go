@@ -79,6 +79,9 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 
 		formattedAnalysisLogs := strings.Split(logAnalysisPayload.Logs, "\n")
 		formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
+		if formattedAnalysisRelevantLogs == nil {
+			formattedAnalysisRelevantLogs = formattedAnalysisLogs
+		}
 
 		qOpts := options.Find()
 		qOpts.Projection = bson.M{"logs": 1}

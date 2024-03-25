@@ -74,22 +74,27 @@ func CompareLogs(incomingLogTails []string, currentIssuesLogTails []string) (isN
 	return
 }
 
-func FilterForRelevantLogs(logs []string) (relevantLogs []string) {
+func FilterForRelevantLogs(logs []string) []string {
+	var relevantLogs = make([]string, 0)
 	//Classes are absractions of different types of logs as different types of issues
 	//have different log structures
 	// Class 0 = Error or Warning message
-	// Class 1 = Exception with stack trace
 	issueClassZeroRegex := `(?i)(abort|blocked|corrupt|crash|critical|deadlock|
-		denied|deprecated|deprecating|err|error|fatal|forbidden|
-		freeze|hang|illegal|invalid|missing|panic|refused|rejected|
-		timeout|unauthorized|unsupported|warn|warning)`
-	issueClassOneRegex := `(?i)(exception|stacktrace|traceback|uncaught|unhandled)`
+		denied|deprecated|deprecating|err|error|exception|fatal|forbidden|
+		freeze|hang|illegal|invalid|missing|panic|refused|rejected|stacktrace|
+		timeout|traceback|unauthorized|uncaught|undefined|unhandled|unsupported|warn|warning)`
 
 	compiledClassZeroRegex := regexp.MustCompile(issueClassZeroRegex)
-	compiledClassOneRegex := regexp.MustCompile(issueClassOneRegex)
 
 	for logIndex, log := range logs {
-		if matched := compiledClassOneRegex.MatchString(log); matched {
+		if len(relevantLogs) != 0 {
+			for _, relevantLog := range relevantLogs {
+				if log == relevantLog {
+					continue
+				}
+			}
+		}
+		if matched := compiledClassZeroRegex.MatchString(log); matched {
 			relevantLogs = append(relevantLogs, logs[logIndex])
 			//Add the next and previous log to the relevant logs if stack trace is found
 			//To be improved
@@ -99,15 +104,10 @@ func FilterForRelevantLogs(logs []string) (relevantLogs []string) {
 			if logIndex-1 >= 0 {
 				relevantLogs = append(relevantLogs, logs[logIndex-1])
 			}
-			return
-		}
-
-		if matched := compiledClassZeroRegex.MatchString(log); matched {
-			relevantLogs = append(relevantLogs, logs[logIndex])
 		}
 	}
 
-	return
+	return relevantLogs
 }
 
 func ComparePasswordHashes(hashedPassword string, password string) bool {
