@@ -139,7 +139,7 @@ class ChatAgent:
                        Do not prompt user to search anything in web or ask support or you will be punished.
                        Do not assume anything that is not there in the intermediate steps and give a proper answer.
                        You will be punished for printing source urls.
-                       Do not output any code or commands if not confirmed by the intermediate steps it must be as accurate as possible. You will be punsihed for wrong information.
+                       You will be punsihed for wrong information.
                        \n Solution:''')
         urls = self.extract_urls(logs, urls)
         title = self.generate_title(summary)
