@@ -132,7 +132,7 @@ class ChatAgent:
         Returns: json object"""
         summary = self.understand_logs(logs)
         urls = self.master_agent(logs)
-        sol = self.llm(f'''You are sofware engineer. Provide solutions to the issue.
+        sol = self.llm(f'''You are software engineer. Provide solutions to the issue.
                        \n Here are the intermediate steps for you to use as in information source to propose issue solutions: {urls}
                        Issues solutions should not suggest silencing the error or warning.
                        Provide just solutions anything else will be punished.
