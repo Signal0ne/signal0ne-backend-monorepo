@@ -20,15 +20,18 @@ type UserIssuesController struct {
 	issuesCollection        *mongo.Collection
 	usersCollection         *mongo.Collection
 	analysisStoreCollection *mongo.Collection
+	reportsCollection       *mongo.Collection
 }
 
 func NewUserIssuesController(issuesCollection *mongo.Collection,
 	usersCollection *mongo.Collection,
-	analysisStoreCollection *mongo.Collection) *UserIssuesController {
+	analysisStoreCollection *mongo.Collection,
+	reportsCollection *mongo.Collection) *UserIssuesController {
 	return &UserIssuesController{
 		issuesCollection:        issuesCollection,
 		usersCollection:         usersCollection,
 		analysisStoreCollection: analysisStoreCollection,
+		reportsCollection:       reportsCollection,
 	}
 }
 
@@ -422,4 +425,49 @@ func (c *UserIssuesController) GetContainers(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, containers)
+}
+
+// ReportIssueAnalysis godoc
+// @Summary Report issue analysis done by the user if the prediction was incorrect or harmful.
+// @Tags issues
+// @Accept json
+// @Produce json
+// @Param reportRequest body models.IssueAnalysisReportRequest true "Report request"
+// @Success 200 {object} models.IssueAnalysisReportResponse
+// @Failure 400 {object} map[string]any
+// @Router /issues/report [post]
+func (c *UserIssuesController) ReportIssueAnalysis(ctx *gin.Context) {
+	var reportRequest models.IssueAnalysisReportRequest
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := ctx.ShouldBindJSON(&reportRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.reportsCollection.InsertOne(ctx, bson.M{
+		"userId":   userId,
+		"issueId":  reportRequest.IssueId,
+		"reason":   reportRequest.Reason,
+		"reported": time.Now(),
+		"delete":   reportRequest.ShouldDelete,
+	})
+
+	if reportRequest.ShouldDelete {
+		_, err = c.issuesCollection.DeleteOne(ctx, bson.M{"_id": reportRequest.IssueId, "userId": userId})
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, models.IssueAnalysisReportResponse{
+		Acknowledged: true,
+		Deleted:      reportRequest.ShouldDelete,
+	})
 }

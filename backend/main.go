@@ -59,6 +59,7 @@ func main() {
 	issuesCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ApplicationIssuesCollectionName)
 	usersCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ApplicationUsersCollectionName)
 	waitlistCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.WaitlistCollectionName)
+	reportsCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ReportsCollectionName)
 
 	savedAnalysisDbClient, err := mongo.Connect(
 		context.Background(),
@@ -96,6 +97,7 @@ func main() {
 		issuesCollectionClient,
 		usersCollectionClient,
 		savedAnalysisCollectionClient,
+		reportsCollectionClient,
 	)
 
 	integrationController := controllers.NewIntegrationController(

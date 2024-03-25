@@ -2,15 +2,21 @@ basePath: /api
 definitions:
   controllers.LogAnalysisPayload:
     properties:
+      containerId:
+        type: string
       containerName:
         type: string
       logs:
+        type: string
+      severity:
         type: string
       userId:
         type: string
     type: object
   models.Issue:
     properties:
+      containerId:
+        type: string
       containerName:
         type: string
       id:
@@ -19,14 +25,18 @@ definitions:
         type: boolean
       issuePredictedSolutionsSources:
         items:
-          $ref: '#/definitions/models.IssueSolutionPredictionSolutionSource'
+          type: string
         type: array
       logSummary:
         type: string
       logs:
-        type: string
+        items:
+          type: string
+        type: array
       predictedSolutionsSummary:
         type: string
+      score:
+        type: integer
       severity:
         type: string
       timestamp:
@@ -36,12 +46,21 @@ definitions:
       userId:
         type: string
     type: object
-  models.IssueSolutionPredictionSolutionSource:
+  models.IssueAnalysisReportRequest:
     properties:
-      title:
+      issueId:
         type: string
-      url:
+      reason:
         type: string
+      shouldDelete:
+        type: boolean
+    type: object
+  models.IssueAnalysisReportResponse:
+    properties:
+      acknowledged:
+        type: boolean
+      deleted:
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -188,6 +207,38 @@ paths:
       summary: Get information about a specific issue.
       tags:
       - issues
+  /issues/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Resolve an issue by providing its ID and resolve state of the issue.
+      parameters:
+      - description: ID of the issue to be resolved
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Mark issue as resolved/unresolved.
+      tags:
+      - issues
   /issues/analysis:
     put:
       consumes:
@@ -226,37 +277,31 @@ paths:
       summary: Perform log analysis and generate solutions.
       tags:
       - analysis
-  /issues/resolve/{id}:
+  /issues/report:
     post:
       consumes:
       - application/json
-      description: Resolve an issue by providing its ID and updating its status to
-        resolved.
       parameters:
-      - description: ID of the issue to be resolved
-        in: path
-        name: id
+      - description: Report request
+        in: body
+        name: reportRequest
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/models.IssueAnalysisReportRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
+            $ref: '#/definitions/models.IssueAnalysisReportResponse'
+        "400":
+          description: Bad Request
           schema:
             additionalProperties: true
             type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Resolve an issue by setting its status to resolved.
+      summary: Report issue analysis done by the user if the prediction was incorrect
+        or harmful.
       tags:
       - issues
 swagger: "2.0"
