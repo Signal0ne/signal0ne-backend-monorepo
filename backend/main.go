@@ -93,6 +93,10 @@ func main() {
 		emailClientData,
 	)
 
+	userController := controllers.NewUserController(
+		usersCollectionClient,
+	)
+
 	userIssuesController := controllers.NewUserIssuesController(
 		issuesCollectionClient,
 		usersCollectionClient,
@@ -125,7 +129,7 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
-	routeController := routers.NewMainRouter(mainController, userAuthController, userIssuesController,
+	routeController := routers.NewMainRouter(mainController, userAuthController, userController, userIssuesController,
 		integrationController, integrationAuthController)
 	routeController.RegisterRoutes(router)
 
