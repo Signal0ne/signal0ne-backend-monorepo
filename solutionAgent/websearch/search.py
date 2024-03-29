@@ -1,8 +1,11 @@
+"""A module to perform Google Custom Search API queries
+and fetch summaries of the search results."""
 import os
 import json
 import requests
 import dotenv
 from newspaper import Article
+from langchain_core.tools import tool
 import nltk
 
 class GoogleCustomSearch:
@@ -31,7 +34,7 @@ class GoogleCustomSearch:
     def search(self, query, **kwargs):
         """Perform a Google Custom Search API query and return the results."""
         payload = self.build_payload(query, **kwargs)
-        response = requests.get(self.base_url, params=payload)
+        response = requests.get(self.base_url, params=payload, timeout=10)
         return response.json()
 
     def fetch_summary(self, url):
@@ -42,6 +45,7 @@ class GoogleCustomSearch:
         article.nlp()
         return article.summary
 
+    @tool
     def run_search(self, query, num_results=3):
         """Run a search query and return the search results with summaries."""
         data = self.search(query, num_results=num_results)
