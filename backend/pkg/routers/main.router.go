@@ -10,6 +10,7 @@ import (
 type MainRouter struct {
 	mainController            *controllers.MainController
 	userAuthController        *controllers.UserAuthController
+	userController            *controllers.UserController
 	userIssuesController      *controllers.UserIssuesController
 	integrationController     *controllers.IntegrationController
 	integrationAuthController *controllers.IntegrationAuthController
@@ -17,15 +18,17 @@ type MainRouter struct {
 
 func NewMainRouter(mainController *controllers.MainController,
 	userAuthController *controllers.UserAuthController,
+	userController *controllers.UserController,
 	userIssuesController *controllers.UserIssuesController,
 	integrationController *controllers.IntegrationController,
-	integartionAuthController *controllers.IntegrationAuthController) *MainRouter {
+	integrationAuthController *controllers.IntegrationAuthController) *MainRouter {
 	return &MainRouter{
 		mainController:            mainController,
 		userAuthController:        userAuthController,
+		userController:            userController,
 		userIssuesController:      userIssuesController,
 		integrationController:     integrationController,
-		integrationAuthController: integartionAuthController,
+		integrationAuthController: integrationAuthController,
 	}
 }
 
@@ -52,6 +55,7 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.PUT("/issues/:id/resolve", mr.userIssuesController.ResolveIssue)
 		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
 		userRouterGroup.POST("/issues/report", mr.userIssuesController.ReportIssueAnalysis)
+		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
 	}
