@@ -9,6 +9,7 @@ type User struct {
 	AgentBearerToken string `json:"agentBearerToken" bson:"agentBearerToken"`
 	Counter          int32  `json:"counter" bson:"counter"`
 	Type             string `json:"type" bson:"type"`
+	Email            string `json:"email" bson:"email"`
 
 	//If user type is signalone
 	PasswordHash          string `json:"passwordHash" bson:"passwordHash"`

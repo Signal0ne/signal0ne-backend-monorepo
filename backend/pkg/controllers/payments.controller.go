@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"signalone/cmd/config"
 	"signalone/pkg/models"
@@ -54,9 +53,6 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating checkout session"})
 		return
 	}
-
-	fmt.Printf("checkoutParams: %v\n", checkoutSession)
-	fmt.Printf("requestData: %v\n", requestData)
 
 	ctx.JSON(http.StatusOK, gin.H{"id": checkoutSession.ID})
 }

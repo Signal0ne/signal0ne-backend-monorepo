@@ -58,6 +58,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 		user = models.User{
 			UserId:           strconv.Itoa(userData.Id),
 			UserName:         userData.Login,
+			Email:            userData.Email,
 			IsPro:            false,
 			AgentBearerToken: "",
 			Counter:          0,
@@ -65,6 +66,20 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 		}
 
 		_, err = c.usersCollection.InsertOne(ctx, user)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if user.Email != userData.Email {
+		_, err = c.usersCollection.UpdateOne(ctx,
+			bson.M{"userId": strconv.Itoa(userData.Id)},
+			bson.M{"$set": bson.M{
+				"email": userData.Email,
+			},
+			},
+		)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -114,7 +129,8 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
 		user = models.User{
 			UserId:           claims.Subject,
-			UserName:         claims.FirstName,
+			UserName:         claims.Email,
+			Email:            claims.Email,
 			IsPro:            false,
 			AgentBearerToken: "",
 			Counter:          0,
@@ -122,6 +138,21 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 		}
 
 		_, err = c.usersCollection.InsertOne(ctx, user)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if user.Email != claims.Email {
+		_, err = c.usersCollection.UpdateOne(ctx,
+			bson.M{"userId": claims.Subject},
+			bson.M{"$set": bson.M{
+				"email":    claims.Email,
+				"userName": claims.Email,
+			},
+			},
+		)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
