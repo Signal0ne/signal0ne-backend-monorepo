@@ -27,7 +27,10 @@ type Config struct {
 	SignalOneSecret string `mapstructure:"SIGNAL_ONE_SECRET"`
 
 	//Stripe Data
-	StripeApiKey string `mapstructure:"STRIPE_API_KEY"`
+	StripeApiKeyProd    string `mapstructure:"STRIPE_API_KEY_PROD"`
+	StripeApiKeyTest    string `mapstructure:"STRIPE_API_KEY_TEST"`
+	StripeProductIdProd string `mapstructure:"STRIPE_PRODUCT_ID_PROD"`
+	StripeProductIdTest string `mapstructure:"STRIPE_PRODUCT_ID_TEST"`
 
 	//Inference Engine API
 	PredicitonAgentServiceUrl string `mapstructure:"PREDICTION_AGENT_SERVICE_URL"`

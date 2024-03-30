@@ -91,6 +91,7 @@ func main() {
 
 	paymentsController := controllers.NewPaymentController(
 		paymentsCollectionClient,
+		usersCollectionClient,
 	)
 
 	userAuthController := controllers.NewUserAuthController(
