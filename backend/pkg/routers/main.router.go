@@ -9,6 +9,7 @@ import (
 
 type MainRouter struct {
 	mainController            *controllers.MainController
+	paymentsController        *controllers.PaymentController
 	userAuthController        *controllers.UserAuthController
 	userController            *controllers.UserController
 	userIssuesController      *controllers.UserIssuesController
@@ -17,6 +18,7 @@ type MainRouter struct {
 }
 
 func NewMainRouter(mainController *controllers.MainController,
+	paymentsController *controllers.PaymentController,
 	userAuthController *controllers.UserAuthController,
 	userController *controllers.UserController,
 	userIssuesController *controllers.UserIssuesController,
@@ -24,6 +26,7 @@ func NewMainRouter(mainController *controllers.MainController,
 	integrationAuthController *controllers.IntegrationAuthController) *MainRouter {
 	return &MainRouter{
 		mainController:            mainController,
+		paymentsController:        paymentsController,
 		userAuthController:        userAuthController,
 		userController:            userController,
 		userIssuesController:      userIssuesController,
@@ -58,6 +61,7 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
+		userRouterGroup.POST("/upgrade-pro", mr.paymentsController.UpgradeProHandler)
 	}
 
 	agentRouterGroup := rg.Group("/agent", mr.integrationAuthController.CheckAgentAuthorization)

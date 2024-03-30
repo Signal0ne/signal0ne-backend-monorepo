@@ -57,6 +57,7 @@ func main() {
 		panic(err)
 	}
 	issuesCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ApplicationIssuesCollectionName)
+	paymentsCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.PaymentsCollectionName)
 	usersCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ApplicationUsersCollectionName)
 	waitlistCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.WaitlistCollectionName)
 	reportsCollectionClient := appDbClient.Database(cfg.ApplicationDbName).Collection(cfg.ReportsCollectionName)
@@ -86,6 +87,10 @@ func main() {
 		savedAnalysisCollectionClient,
 		waitlistCollectionClient,
 		emailClientData,
+	)
+
+	paymentsController := controllers.NewPaymentController(
+		paymentsCollectionClient,
 	)
 
 	userAuthController := controllers.NewUserAuthController(
@@ -129,7 +134,7 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
-	routeController := routers.NewMainRouter(mainController, userAuthController, userController, userIssuesController,
+	routeController := routers.NewMainRouter(mainController, paymentsController, userAuthController, userController, userIssuesController,
 		integrationController, integrationAuthController)
 	routeController.RegisterRoutes(router)
 

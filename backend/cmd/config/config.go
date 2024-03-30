@@ -26,6 +26,9 @@ type Config struct {
 	//SignalOne Data
 	SignalOneSecret string `mapstructure:"SIGNAL_ONE_SECRET"`
 
+	//Stripe Data
+	StripeApiKey string `mapstructure:"STRIPE_API_KEY"`
+
 	//Inference Engine API
 	PredicitonAgentServiceUrl string `mapstructure:"PREDICTION_AGENT_SERVICE_URL"`
 	InferenceApiUrl           string `mapstructure:"INFERENCE_API_URL"`
@@ -43,6 +46,7 @@ type Config struct {
 	ApplicationUsersCollectionName  string `mapstructure:"APPLICATION_USERS_COLLECTION_NAME"`
 	WaitlistCollectionName          string `mapstructure:"WAITLIST_COLLECTION_NAME"`
 	ReportsCollectionName           string `mapstructure:"REPORTS_COLLECTION_NAME"`
+	PaymentsCollectionName          string `mapstructure:"PAYMENTS_COLLECTION_NAME"`
 
 	//Saved Analysis Database Details
 	SavedAnalysisDbUrl          string `mapstructure:"SAVED_ANALYSIS_DB_URL"`
