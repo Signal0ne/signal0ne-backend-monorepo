@@ -2,10 +2,10 @@
 and fetch summaries of the search results."""
 import os
 import json
+from newspaper import Config
 import requests
 import dotenv
 from newspaper import Article
-from langchain_core.tools import tool
 import nltk
 
 class GoogleCustomSearch:
@@ -26,11 +26,11 @@ class GoogleCustomSearch:
             'q': query,
             'key': self.api_key,
             'cx': self.cse_id,
-            'num': num_results
+            'num': num_results,
         }
         payload.update(kwargs)
         return payload
-
+    
     def search(self, query, **kwargs):
         """Perform a Google Custom Search API query and return the results."""
         payload = self.build_payload(query, **kwargs)
@@ -39,20 +39,35 @@ class GoogleCustomSearch:
 
     def fetch_summary(self, url):
         """Fetch the summary of an article from the given URL."""
-        article = Article(url)
-        article.download()
-        article.parse()
-        article.nlp()
-        return article.summary
-
-    @tool
-    def run_search(self, query, num_results=3):
+        try:
+            config = Config()
+            config.browser_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+            article = Article(url, config=config)
+            article.download()
+            article.parse()
+            article.nlp()
+            return article.summary
+        except Exception as e:
+            print(f"Error fetching summary: {e}")
+            return ""
+        
+    def run_search(self, query, num_results=9):
         """Run a search query and return the search results with summaries."""
         data = self.search(query, num_results=num_results)
         results = []
-        for item in data['items']:
+        if 'items' not in data:
+            query = data['spelling']['correctedQuery']
+            print(f"Corrected query: {query}")
+            data = self.search(query, num_results=num_results)
+        for index, item in enumerate(data['items'], start=1):
             url = item['link']
             snippet = item['snippet']
             summary = self.fetch_summary(url)
             results.append({'url': url, 'snippet': snippet, 'summary': summary})
         return json.dumps(results, indent=4)
+
+if __name__ == "__main__":
+    search = GoogleCustomSearch()
+    q = """Why is there an error about a missing job runner for an existing job in the Kudu system?"""
+    results = search.run_search(query = q)
+    print(results)
