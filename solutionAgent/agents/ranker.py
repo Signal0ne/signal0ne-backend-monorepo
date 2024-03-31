@@ -5,7 +5,7 @@ from langchain_community.llms import HuggingFaceEndpoint
 from dotenv import load_dotenv
 
 
-class ChatAgent:
+class RankAgent:
     """Class for the chat agent."""
     def __init__(self, endpoint):
         load_dotenv()
