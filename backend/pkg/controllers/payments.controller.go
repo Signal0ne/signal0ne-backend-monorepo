@@ -57,7 +57,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		return
 	}
 
-	stripeCustomer, err := utils.HandleStripeCustomer(user.UserCustomerId)
+	stripeCustomer, _ := utils.HandleStripeCustomer(user.UserCustomerId)
 
 	checkoutSessionParams := &stripe.CheckoutSessionParams{
 		CancelURL: stripe.String(requestData.CancelUrl),
