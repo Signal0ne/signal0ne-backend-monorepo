@@ -75,8 +75,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 	}
 	if stripeCustomer != nil {
 		checkoutSessionParams.Customer = stripe.String(user.UserCustomerId)
-	}
-	if user.Email != "" {
+	} else if user.Email != "" {
 		checkoutSessionParams.CustomerEmail = stripe.String(user.Email)
 	}
 
@@ -89,4 +88,41 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"id": checkoutSession.ID})
+}
+
+func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
+	var user models.User
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	err = utils.GetUser(ctx, pc.usersCollection, bson.M{"userId": userId}, &user)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	successfulCheckoutSessionId := ctx.Query("session_id")
+
+	successfulCheckoutSession, err := session.Get(successfulCheckoutSessionId, nil)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error getting checkout session"})
+		return
+	}
+	if successfulCheckoutSession.Status != "complete" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "checkout session is not completed"})
+		return
+	}
+
+	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+		bson.M{"$set": bson.M{
+			"isPro":          true,
+			"userCustomerId": successfulCheckoutSession.Customer.ID,
+		},
+		})
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
