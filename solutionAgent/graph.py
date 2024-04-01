@@ -1,3 +1,4 @@
+import json
 import os
 from dotenv import load_dotenv
 from typing import List, Tuple
@@ -36,6 +37,6 @@ class GraphGen:
 
         # Execute the graph
         final_output, urls = query_generator_node.execute(logs=logs)
-
-        return final_output, urls
+        output = [{"solution": final_output, "urls": urls}]
+        return json.dumps(output)
     
