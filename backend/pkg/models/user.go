@@ -5,6 +5,7 @@ import "github.com/golang-jwt/jwt/v5"
 type User struct {
 	UserId           string `json:"userId" bson:"userId"`
 	UserName         string `json:"userName" bson:"userName"`
+	UserCustomerId   string `json:"userCustomerId" bson:"userCustomerId"`
 	IsPro            bool   `json:"isPro" bson:"isPro"`
 	AgentBearerToken string `json:"agentBearerToken" bson:"agentBearerToken"`
 	Counter          int32  `json:"counter" bson:"counter"`
