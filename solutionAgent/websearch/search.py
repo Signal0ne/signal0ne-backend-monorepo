@@ -19,14 +19,15 @@ class GoogleCustomSearch:
         self.api_key = api_key
         self.cse_id = cse_id
         self.base_url = "https://www.googleapis.com/customsearch/v1"
+        self.num_results = 3
 
-    def build_payload(self, query, num_results=3, **kwargs):
+    def build_payload(self, query, **kwargs):
         """Build the payload for the Google Custom Search API query."""
         payload = {
             'q': query,
             'key': self.api_key,
             'cx': self.cse_id,
-            'num': num_results,
+            'num': self.num_results,
         }
         payload.update(kwargs)
         return payload
@@ -51,23 +52,32 @@ class GoogleCustomSearch:
             print(f"Error fetching summary: {e}")
             return ""
         
-    def run_search(self, query, num_results=9):
+    def run_search(self, queries):
         """Run a search query and return the search results with summaries."""
-        data = self.search(query, num_results=num_results)
         results = []
-        if 'items' not in data:
-            query = data['spelling']['correctedQuery']
-            print(f"Corrected query: {query}")
-            data = self.search(query, num_results=num_results)
-        for index, item in enumerate(data['items'], start=1):
-            url = item['link']
-            snippet = item['snippet']
-            summary = self.fetch_summary(url)
-            results.append({'url': url, 'snippet': snippet, 'summary': summary})
+        global_index = 1
+        for query in queries['queries']:
+            query = query['question']
+            data = self.search(query)
+            try:
+                if 'items' not in data:
+                    query = data['spelling']['correctedQuery']
+                    data = self.search(query)
+                for item in data['items']:
+                    url = item['link']
+                    snippet = item['snippet']
+                    summary = self.fetch_summary(url)
+                    results.append({'index': global_index, 'url': url, 'snippet': snippet, 'summary': summary})
+                    global_index += 1
+            except Exception as e:
+                print(f"Error processing search results: {e}")
+                results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
+                global_index += 1
+        print(f"\n\n\n\nSearch results: {results}")
         return json.dumps(results, indent=4)
 
-if __name__ == "__main__":
-    search = GoogleCustomSearch()
-    q = """Why is there an error about a missing job runner for an existing job in the Kudu system?"""
-    results = search.run_search(query = q)
-    print(results)
+# if __name__ == "__main__":
+#     search = GoogleCustomSearch()
+#     q = """What is the cause of the 'Unsupported state or unable to authenticate data' error in Node.js crypto decipheriv function?"""
+#     results = search.run_search(queries = [q])
+#     print(results)
