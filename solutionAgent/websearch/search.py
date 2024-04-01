@@ -70,14 +70,9 @@ class GoogleCustomSearch:
                     results.append({'index': global_index, 'url': url, 'snippet': snippet, 'summary': summary})
                     global_index += 1
             except Exception as e:
+                print(f"Error processing: {data}")
                 print(f"Error processing search results: {e}")
                 results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
                 global_index += 1
         print(f"\n\n\n\nSearch results: {results}")
         return json.dumps(results, indent=4)
-
-# if __name__ == "__main__":
-#     search = GoogleCustomSearch()
-#     q = """What is the cause of the 'Unsupported state or unable to authenticate data' error in Node.js crypto decipheriv function?"""
-#     results = search.run_search(queries = [q])
-#     print(results)

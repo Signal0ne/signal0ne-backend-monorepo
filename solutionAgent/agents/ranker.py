@@ -22,7 +22,7 @@ class RankAgent:
         
     def rank(self, outputs, logs):
         """Generate questions from the logs."""
-        prompt = f"""System: You are a helpful assistant that helps ranking the top 3 outputs of websearch based on how relevant
+        prompt = f"""System: You are a helpful assistant that helps ranking the top outputs of websearch based on how relevant
         they are to solving the error recieved in logs. You may use snippet or summary do do your ranking.
         You only give ranking of the indexes of the websearch results.
         Here are user logs: {logs}\n

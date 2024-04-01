@@ -13,9 +13,7 @@ class Node:
     def execute(self, *input_data, **kwargs):
         """Execute the function of the node and pass the output to the children."""
         print("Executing function:", self.name)
-        print("Input data:", input_data)  
-        print("Keyword arguments:", kwargs)
-        
+                
         if not self.include_logs:
             filtered_kwargs = {k: v for k, v in kwargs.items() if k != 'logs'}
         else:
