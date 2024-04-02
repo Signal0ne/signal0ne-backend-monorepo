@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"signalone/cmd/config"
 	"signalone/pkg/models"
@@ -31,9 +32,12 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 
 	cfg := config.GetInstance()
 	stripe.Key = cfg.StripeApiKeyProd
-
 	if cfg.Mode == "local" {
 		stripe.Key = cfg.StripeApiKeyTest
+	}
+	stripeProductId := cfg.StripeProductIdProd
+	if cfg.Mode == "local" {
+		stripeProductId = cfg.StripeProductIdTest
 	}
 
 	userId, err := utils.GetUserIdFromToken(ctx)
@@ -53,33 +57,10 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		return
 	}
 
-	stripeProductId := cfg.StripeProductIdProd
-
-	if cfg.Mode == "local" {
-		stripeProductId = cfg.StripeProductIdTest
-	}
-
-	//TODO: Check if user exists in the Stripe customer list
-	// params := &stripe.CustomerListParams{
-	// 	Email: stripe.String("abc2@gmail.com"),
-	// }
-	// result := customer.List(params)
-
-	// fmt.Printf("result: %+v\n", result)
-
-	// customerParams := &stripe.CustomerParams{
-	// 	Email: stripe.String("abc@gmail.com"),
-	// }
-
-	// customer, err := customer.New(customerParams)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating customer"})
-	// 	return
-	// }
+	stripeCustomer, _ := utils.HandleStripeCustomer(user.UserCustomerId)
 
 	checkoutSessionParams := &stripe.CheckoutSessionParams{
 		CancelURL: stripe.String(requestData.CancelUrl),
-		// Customer: stripe.String(customer.ID),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				Price:    stripe.String(stripeProductId),
@@ -92,14 +73,13 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		}),
 		SuccessURL: stripe.String(fmt.Sprintf("%s?session_id={CHECKOUT_SESSION_ID}", requestData.SuccessUrl)),
 	}
+	if stripeCustomer != nil {
+		checkoutSessionParams.Customer = stripe.String(user.UserCustomerId)
+	} else if user.Email != "" {
+		checkoutSessionParams.CustomerEmail = stripe.String(user.Email)
+	}
 
 	checkoutSessionParams.AddExpand("customer")
-
-	// result, err := session.Get("{{SESSION_ID}}", checkoutSessionParams)
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating checkout session"})
-	// 	return
-	// }
 
 	checkoutSession, err := session.New(checkoutSessionParams)
 	if err != nil {
@@ -108,4 +88,41 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"id": checkoutSession.ID})
+}
+
+func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
+	var user models.User
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	err = utils.GetUser(ctx, pc.usersCollection, bson.M{"userId": userId}, &user)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	successfulCheckoutSessionId := ctx.Query("session_id")
+
+	successfulCheckoutSession, err := session.Get(successfulCheckoutSessionId, nil)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error getting checkout session"})
+		return
+	}
+	if successfulCheckoutSession.Status != "complete" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "checkout session is not completed"})
+		return
+	}
+
+	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+		bson.M{"$set": bson.M{
+			"isPro":          true,
+			"userCustomerId": successfulCheckoutSession.Customer.ID,
+		},
+		})
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }

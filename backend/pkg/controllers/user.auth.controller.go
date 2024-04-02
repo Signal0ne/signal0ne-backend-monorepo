@@ -221,6 +221,15 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
+	if user.Email == "" {
+		c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+			bson.M{
+				"$set": bson.M{
+					"email": loginData.Email},
+			},
+		)
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":      "Success",
 		"accessToken":  accessTokenString,
@@ -299,6 +308,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 	user = models.User{
 		UserId:                userId,
 		UserName:              loginData.Email,
+		Email:                 loginData.Email,
 		PasswordHash:          hashedPassword,
 		IsPro:                 false,
 		AgentBearerToken:      "",
