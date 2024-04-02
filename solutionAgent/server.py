@@ -2,7 +2,7 @@ import os
 import time
 from fastapi import FastAPI
 from pydantic import BaseModel
-from agent import ChatAgent
+from graph import GraphGen
 
 class LogData(BaseModel):
     '''Class for the log data'''
@@ -13,8 +13,8 @@ app = FastAPI()
 @app.post("/run_analysis")
 async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
-    chat_agent = ChatAgent(os.getenv('ENDPOINT_URL'))
-    backup_chat_agent = ChatAgent(os.getenv('BACKUP_ENDPOINT_URL'))
+    chat_agent = GraphGen(os.getenv('ENDPOINT_URL'))
+    backup_chat_agent = GraphGen(os.getenv('BACKUP_ENDPOINT_URL'))
     retries = 0
     while True:
         try:
