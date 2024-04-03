@@ -26,7 +26,6 @@ class QueryAgent:
         Here are the logs: {logs}\n
         Output format is {{"queries": [{{"question":"your question","context":"the context for the question"}}]}}. Json:"""
         result = self.llm(prompt)
-        print(result)
         return json.loads(result)
     
 # if __name__ == "__main__":

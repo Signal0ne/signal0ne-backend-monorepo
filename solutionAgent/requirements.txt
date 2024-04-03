@@ -1,9 +1,11 @@
-langchain==0.1.7
-langchainhub==0.1.14
+langchain
+langchainhub
 openai
-langchain-community==0.0.20 
+langchain-community
 tavily-python
 python-dotenv
 uvicorn
 huggingface-hub==0.20.3
 fastapi
+lxml_html_clean
+newspaper3k
