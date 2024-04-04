@@ -57,7 +57,6 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 					"$set": bson.M{"isPro": false},
 				})
 		}
-
 	}
 
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
@@ -465,11 +464,33 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 	var cfg = config.GetInstance()
 	var claims = &models.JWTClaimsWithUserData{}
 	var data models.RefreshTokenRequest
+	var user models.User
 	var SECRET_KEY = []byte(cfg.SignalOneSecret)
 
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	userId, err := utils.VerifyToken(data.RefreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+
+	if user.IsPro {
+		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
+		if !proConfirmed {
+			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+				bson.M{
+					"$set": bson.M{"isPro": false},
+				})
+		}
 	}
 
 	token, err := jwt.ParseWithClaims(data.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
