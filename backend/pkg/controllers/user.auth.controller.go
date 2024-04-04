@@ -49,6 +49,17 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 
 	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
 
+	if user.IsPro {
+		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
+		if !proConfirmed {
+			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+				bson.M{
+					"$set": bson.M{"isPro": false},
+				})
+		}
+
+	}
+
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -144,6 +155,17 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 		}
 	}
 
+	if user.IsPro {
+		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
+		if !proConfirmed {
+			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+				bson.M{
+					"$set": bson.M{"isPro": false},
+				})
+		}
+
+	}
+
 	if user.Email != claims.Email {
 		_, err = c.usersCollection.UpdateOne(ctx,
 			bson.M{"userId": claims.Subject},
@@ -197,6 +219,17 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 	} else if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
+	}
+
+	if user.IsPro {
+		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
+		if !proConfirmed {
+			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
+				bson.M{
+					"$set": bson.M{"isPro": false},
+				})
+		}
+
 	}
 
 	if !utils.ComparePasswordHashes(user.PasswordHash, loginData.Password) {

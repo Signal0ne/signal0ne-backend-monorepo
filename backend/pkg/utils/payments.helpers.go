@@ -12,3 +12,19 @@ func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
 	}
 	return stripeCustomer, nil
 }
+
+func VerifyProTierSubscription(customerId string) bool {
+	var proConfirmed bool = false
+	stripeCustomer, err := HandleStripeCustomer(customerId)
+	if err != nil {
+		proConfirmed = false
+	} else {
+		for _, subscription := range stripeCustomer.Subscriptions.Data {
+			if subscription.Status == "active" {
+				proConfirmed = true
+				break
+			}
+		}
+	}
+	return proConfirmed
+}
