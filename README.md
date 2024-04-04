@@ -21,8 +21,15 @@ cp backend/.env.template backend/.default.env
 
 ### Backend
 
+For development : 
 ```
-make --directory=./backend build-backend
+make --directory=./backend dev-build-backend
+
+```
+
+For production: 
+```
+make --directory=./backend prod-build-backend
 
 ```
 ```
