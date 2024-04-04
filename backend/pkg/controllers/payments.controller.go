@@ -6,6 +6,7 @@ import (
 	"signalone/cmd/config"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
@@ -91,6 +92,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 }
 
 func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
+	const CheckoutExpirationTimeDelta = 172800
 	var user models.User
 
 	userId, err := utils.GetUserIdFromToken(ctx)
@@ -109,11 +111,15 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 
 	successfulCheckoutSession, err := session.Get(successfulCheckoutSessionId, nil)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error getting checkout session"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
+		return
+	}
+	if ((successfulCheckoutSession.Created - time.Now().Unix()) * -1) > CheckoutExpirationTimeDelta {
+		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
 		return
 	}
 	if successfulCheckoutSession.Status != "complete" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "checkout session is not completed"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
 		return
 	}
 
