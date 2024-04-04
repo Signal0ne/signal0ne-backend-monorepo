@@ -17,14 +17,14 @@ class CodeGen:
             repetition_penalty=1.1,
         )
 
-    def gen_code(self, logs, current_code, predicted_solutions):
+    def gen_code(self, logs, current_code, predicted_solutions, lnguageId):
+        print(lnguageId)
         """Generate code snippets from the logs."""
-        prompt = f"""You are a helpful assistant that helps generate code snippets from a set of error logs for a given code snippet. 
-        Take a note of the module and library causing error or any component that could help in generating code snippets. You return a json with the code snippet. 
-        Your return type is json. You only output in the format specified below.
+        prompt = f"""You are a helpful assistant that helps to fix code written in {lnguageId} based on the error and logs for a given code snippet. 
+        You return a json with the code snippet. You only return the code no explanation.
+        Your return type is json.
         Here are the logs: {logs}\n
         Here is the current code: {current_code}\n
-        Here are the predicted solutions that can help with debugging: {predicted_solutions}\n
         Output format is {{"code":"your code snippet"}}. Json:"""
         result = self.llm(prompt)
         print(result)

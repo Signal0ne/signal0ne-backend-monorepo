@@ -218,6 +218,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		CurrentCodeSnippet: codeContext.Code,
 		Logs:               strings.Join(formattedAnalysisRelevantLogs, "\n"),
 		PredictedSolutions: issue.PredictedSolutionsSummary,
+		LanguageId:         codeContext.Lang,
 	}
 
 	jsonData, _ := json.Marshal(codeSnippetRequest)
@@ -229,7 +230,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 
 	ctx.JSON(200, gin.H{
 		"message": "Success",
-		"newCode": analysisResponse.NewCodeSnippet,
+		"newCode": analysisResponse.Code,
 	})
 
 }
