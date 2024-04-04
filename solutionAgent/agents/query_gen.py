@@ -24,7 +24,7 @@ class QueryAgent:
         Take a note of the module and library causing error or any component that could help in searching the web for more information. You return a json with the queries. Do not forget to add relevant log
         statements and to each of your queries. Your return type is json. You only output in the format specified below.
         Here are the logs: {logs}\n
-        Output format is {{"question":"your question","context":"the context for the question"}}. Json:"""
+        Output format is {{"queries": [{{"question":"your question","context":"the context for the question"}}]}}. Json:"""
         result = self.llm(prompt)
         return json.loads(result)
     

@@ -38,6 +38,9 @@ func NewMainRouter(mainController *controllers.MainController,
 func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("/contact", mr.mainController.ContactHandler)
 	rg.POST("/waitlist", mr.mainController.WaitlistHandler)
+	// For testing purposes
+	rg.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
+	//
 
 	authorizationRouterGroup := rg.Group("/auth")
 	authorizationRouterGroup.POST("/email-confirmation", mr.userAuthController.VerifyEmail)
