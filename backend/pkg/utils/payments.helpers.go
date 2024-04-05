@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
@@ -13,7 +16,7 @@ func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
 	return stripeCustomer, nil
 }
 
-func VerifyProTierSubscription(customerId string) bool {
+func VerifyProTierSubscription(ctx *gin.Context, customerId string, userId string, usersCollection *mongo.Collection) {
 	var proConfirmed bool = false
 	stripeCustomer, err := HandleStripeCustomer(customerId)
 	if err != nil {
@@ -26,5 +29,10 @@ func VerifyProTierSubscription(customerId string) bool {
 			}
 		}
 	}
-	return proConfirmed
+	if !proConfirmed {
+		usersCollection.UpdateOne(ctx, bson.M{"userId": userId},
+			bson.M{
+				"$set": bson.M{"isPro": false},
+			})
+	}
 }

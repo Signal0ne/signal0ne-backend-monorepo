@@ -222,3 +222,23 @@ func VerifyToken(tokenString string) (string, error) {
 
 	return claims.Id, nil
 }
+
+func GetTokenExpirationDateInUnixFormat(tokenString string) int64 {
+	var cfg = config.GetInstance()
+	var claims = &models.JWTClaimsWithUserData{}
+	var SECRET_KEY = []byte(cfg.SignalOneSecret)
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return SECRET_KEY, nil
+	})
+	if err != nil {
+		return -1
+	}
+
+	expirationTimestamp, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return -1
+	}
+
+	return expirationTimestamp.Unix()
+}

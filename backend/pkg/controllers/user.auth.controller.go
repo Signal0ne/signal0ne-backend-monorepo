@@ -50,13 +50,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
 
 	if user.IsPro {
-		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
-		if !proConfirmed {
-			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
-				bson.M{
-					"$set": bson.M{"isPro": false},
-				})
-		}
+		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
 	}
 
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
@@ -155,14 +149,7 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 	}
 
 	if user.IsPro {
-		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
-		if !proConfirmed {
-			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
-				bson.M{
-					"$set": bson.M{"isPro": false},
-				})
-		}
-
+		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
 	}
 
 	if user.Email != claims.Email {
@@ -221,14 +208,7 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 	}
 
 	if user.IsPro {
-		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
-		if !proConfirmed {
-			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
-				bson.M{
-					"$set": bson.M{"isPro": false},
-				})
-		}
-
+		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
 	}
 
 	if !utils.ComparePasswordHashes(user.PasswordHash, loginData.Password) {
@@ -461,10 +441,12 @@ func (c *UserAuthController) ResendConfirmationEmail(ctx *gin.Context) {
 }
 
 func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
+	const RefreshTokenExpirationDeltaThreshold = 7200
 	var cfg = config.GetInstance()
 	var claims = &models.JWTClaimsWithUserData{}
 	var data models.RefreshTokenRequest
 	var user models.User
+	var refreshTokenString string
 	var SECRET_KEY = []byte(cfg.SignalOneSecret)
 
 	if err := ctx.ShouldBindJSON(&data); err != nil {
@@ -483,14 +465,18 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		return
 	}
 
-	if user.IsPro {
-		proConfirmed := utils.VerifyProTierSubscription(user.UserId)
-		if !proConfirmed {
-			c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
-				bson.M{
-					"$set": bson.M{"isPro": false},
-				})
+	expirationDelta := utils.GetTokenExpirationDateInUnixFormat(data.RefreshToken) - time.Now().Unix()
+	if expirationDelta >= 0 && expirationDelta < RefreshTokenExpirationDeltaThreshold {
+		if user.IsPro {
+			utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
 		}
+		refreshTokenString, err = utils.CreateToken(claims.Id, claims.UserName, "refresh")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
+			return
+		}
+	} else {
+		refreshTokenString = data.RefreshToken
 	}
 
 	token, err := jwt.ParseWithClaims(data.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
@@ -508,12 +494,6 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 	}
 
 	accessTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "access")
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
-		return
-	}
-
-	refreshTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
