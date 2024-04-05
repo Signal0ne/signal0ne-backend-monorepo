@@ -33,12 +33,13 @@ class GraphGen:
         self.answer_generator = AnswerGenerator(self.endpoint_url)
 
     def genTitleSummary(self, logs: str) -> Tuple[str, str]:
-        title = self.llm(f"""Act like a software debugger and generate a title for these
+        """Generate title and summary of the error logs."""
+        ans = self.llm(f"""Act like a software debugger and generate a title for these
                          error logs and give a single paragraph summary of the error logs in technical detail in a json format.
                          logs: {logs})
                          Output json format is \"title\": \"your title\", \"logsummary\": \"your summary\"
                          json: """)
-        json_str = title[title.find('{'):title.rfind('}') + 1]
+        json_str = ans[ans.find('{'):ans.rfind('}') + 1]
 
 
         if json_str:
@@ -66,6 +67,5 @@ class GraphGen:
         final_output, urls = query_generator_node.execute(logs=logs)
         title, summary = gentitle.execute(logs=logs)
         output = [{"title":title, "Logsummary":summary,"predictedSolutions":final_output, "sources":urls}]
-        print(output)
         return json.dumps(output)
     
