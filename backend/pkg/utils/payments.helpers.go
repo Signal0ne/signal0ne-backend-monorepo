@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"signalone/pkg/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
@@ -16,23 +18,27 @@ func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
 	return stripeCustomer, nil
 }
 
-func VerifyProTierSubscription(ctx *gin.Context, customerId string, userId string, usersCollection *mongo.Collection) {
+func VerifyProTierSubscription(ctx *gin.Context, user models.User, usersCollection *mongo.Collection) {
 	var proConfirmed bool = false
-	stripeCustomer, err := HandleStripeCustomer(customerId)
+	stripeCustomer, err := HandleStripeCustomer(user.UserCustomerId)
 	if err != nil {
 		proConfirmed = false
 	} else {
 		for _, subscription := range stripeCustomer.Subscriptions.Data {
-			if subscription.Status == "active" {
+			if subscription.Status == "active" &&
+				subscription.Items.Data[0].Price.Product.ID == user.ProTierProductId {
 				proConfirmed = true
 				break
 			}
 		}
 	}
 	if !proConfirmed {
-		usersCollection.UpdateOne(ctx, bson.M{"userId": userId},
+		usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 			bson.M{
-				"$set": bson.M{"isPro": false},
+				"$set": bson.M{
+					"isPro":            false,
+					"proTierProductId": "",
+				},
 			})
 	}
 }

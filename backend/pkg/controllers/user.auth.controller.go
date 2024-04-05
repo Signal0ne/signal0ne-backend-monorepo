@@ -50,7 +50,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
 
 	if user.IsPro {
-		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 	}
 
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
@@ -149,7 +149,7 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 	}
 
 	if user.IsPro {
-		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 	}
 
 	if user.Email != claims.Email {
@@ -208,7 +208,7 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 	}
 
 	if user.IsPro {
-		utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 	}
 
 	if !utils.ComparePasswordHashes(user.PasswordHash, loginData.Password) {
@@ -469,7 +469,7 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		}
 
 		if user.IsPro {
-			utils.VerifyProTierSubscription(ctx, user.UserCustomerId, user.UserId, c.usersCollection)
+			utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 		}
 
 		refreshTokenString, err = utils.CreateToken(claims.Id, claims.UserName, "refresh")

@@ -125,8 +125,9 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 
 	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 		bson.M{"$set": bson.M{
-			"isPro":          true,
-			"userCustomerId": successfulCheckoutSession.Customer.ID,
+			"isPro":            true,
+			"userCustomerId":   successfulCheckoutSession.Customer.ID,
+			"proTierProductId": successfulCheckoutSession.LineItems.Data[0].Price.Product.ID,
 		},
 		})
 
