@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
+	"github.com/stripe/stripe-go/v76/subscription"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -123,11 +124,17 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 		return
 	}
 
+	stripeSubscription, err := subscription.Get(successfulCheckoutSession.Subscription.ID, nil)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
+		return
+	}
+
 	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 		bson.M{"$set": bson.M{
 			"isPro":            true,
 			"userCustomerId":   successfulCheckoutSession.Customer.ID,
-			"proTierProductId": successfulCheckoutSession.LineItems.Data[0].Price.Product.ID,
+			"proTierProductId": stripeSubscription.Items.Data[0].Price.Product.ID,
 		},
 		})
 

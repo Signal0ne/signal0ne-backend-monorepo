@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"signalone/cmd/config"
 	"signalone/pkg/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/subscription"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -20,16 +22,15 @@ func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
 
 func VerifyProTierSubscription(ctx *gin.Context, user models.User, usersCollection *mongo.Collection) {
 	var proConfirmed bool = false
-	stripeCustomer, err := HandleStripeCustomer(user.UserCustomerId)
-	if err != nil {
-		proConfirmed = false
-	} else {
-		for _, subscription := range stripeCustomer.Subscriptions.Data {
-			if subscription.Status == "active" &&
-				subscription.Items.Data[0].Price.Product.ID == user.ProTierProductId {
-				proConfirmed = true
-				break
-			}
+	var cfg = config.GetInstance()
+	stripe.Key = cfg.StripeApiKeyTest
+	subscriptions := subscription.List(&stripe.SubscriptionListParams{Customer: stripe.String(user.UserCustomerId)})
+	for _, sub := range subscriptions.SubscriptionList().Data {
+		stripeSubscription, _ := subscription.Get(sub.ID, nil)
+		if stripeSubscription.Status == "active" &&
+			stripeSubscription.Items.Data[0].Price.Product.ID == user.ProTierProductId {
+			proConfirmed = true
+			break
 		}
 	}
 	if !proConfirmed {

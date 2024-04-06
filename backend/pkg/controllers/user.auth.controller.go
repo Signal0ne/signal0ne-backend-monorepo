@@ -441,9 +441,9 @@ func (c *UserAuthController) ResendConfirmationEmail(ctx *gin.Context) {
 }
 
 func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
-	const RefreshTokenExpirationDeltaThreshold = 7200
-	var cfg = config.GetInstance()
+	const RefreshTokenExpirationDeltaThreshold = 3600 * 2
 	var claims = &models.JWTClaimsWithUserData{}
+	var cfg = config.GetInstance()
 	var data models.RefreshTokenRequest
 	var user models.User
 	var refreshTokenString string
@@ -460,8 +460,23 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		return
 	}
 
+	token, err := jwt.ParseWithClaims(data.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
+		return SECRET_KEY, nil
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !token.Valid {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+
 	expirationDelta := utils.GetTokenExpirationDateInUnixFormat(data.RefreshToken) - time.Now().Unix()
 	if expirationDelta >= 0 && expirationDelta < RefreshTokenExpirationDeltaThreshold {
+
 		err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
@@ -479,20 +494,6 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		}
 	} else {
 		refreshTokenString = data.RefreshToken
-	}
-
-	token, err := jwt.ParseWithClaims(data.RefreshToken, claims, func(token *jwt.Token) (interface{}, error) {
-		return SECRET_KEY, nil
-	})
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-		return
 	}
 
 	accessTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "access")

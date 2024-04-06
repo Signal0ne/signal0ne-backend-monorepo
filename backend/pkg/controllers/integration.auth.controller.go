@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"signalone/cmd/config"
 	"signalone/pkg/models"
@@ -84,7 +83,6 @@ func (c *IntegrationAuthController) CheckAgentAuthorization(ctx *gin.Context) {
 
 	err := c.VerifyAgentToken(ctx, token)
 	if err != nil {
-		fmt.Printf("Error: %s", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		ctx.Abort()
 		return
