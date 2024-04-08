@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
@@ -89,13 +88,11 @@ func (c *UserIssuesController) IssuesSearch(ctx *gin.Context) {
 
 	startTimestamp, err := time.Parse(time.RFC3339, startTimestampQuery)
 	if err != nil {
-		fmt.Print("Error: ", err)
 		startTimestamp = time.Time{}.UTC()
 	}
 
 	endTimestamp, err := time.Parse(time.RFC3339, endTimestampQuery)
 	if err != nil || endTimestampQuery == "" {
-		fmt.Print("Error: ", err)
 		endTimestamp = time.Now().UTC()
 	}
 
@@ -318,7 +315,6 @@ func (c *UserIssuesController) RegenerateSolution(ctx *gin.Context) {
 
 	analysisResponse, err = utils.CallPredictionAgentService(jsonData)
 	if err != nil {
-		fmt.Printf("Error: %v", err)
 		return
 	}
 

@@ -6,10 +6,12 @@ import (
 	"signalone/cmd/config"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
+	"github.com/stripe/stripe-go/v76/subscription"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -91,6 +93,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 }
 
 func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
+	const CheckoutExpirationTimeDelta = 172800
 	var user models.User
 
 	userId, err := utils.GetUserIdFromToken(ctx)
@@ -109,18 +112,29 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 
 	successfulCheckoutSession, err := session.Get(successfulCheckoutSessionId, nil)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error getting checkout session"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
+		return
+	}
+	if ((successfulCheckoutSession.Created - time.Now().Unix()) * -1) > CheckoutExpirationTimeDelta {
+		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
 		return
 	}
 	if successfulCheckoutSession.Status != "complete" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "checkout session is not completed"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
+		return
+	}
+
+	stripeSubscription, err := subscription.Get(successfulCheckoutSession.Subscription.ID, nil)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
 		return
 	}
 
 	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 		bson.M{"$set": bson.M{
-			"isPro":          true,
-			"userCustomerId": successfulCheckoutSession.Customer.ID,
+			"isPro":            true,
+			"userCustomerId":   successfulCheckoutSession.Customer.ID,
+			"proTierProductId": stripeSubscription.Items.Data[0].Price.Product.ID,
 		},
 		})
 
