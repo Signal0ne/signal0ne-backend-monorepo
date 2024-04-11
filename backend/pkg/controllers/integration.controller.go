@@ -79,7 +79,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 
 		formattedAnalysisLogs := strings.Split(logAnalysisPayload.Logs, "\n")
 		formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
-		if formattedAnalysisRelevantLogs == nil {
+		if len(formattedAnalysisRelevantLogs) < 1 {
 			formattedAnalysisRelevantLogs = formattedAnalysisLogs
 		}
 
