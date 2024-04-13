@@ -21,9 +21,13 @@ cp backend/.env.template backend/.default.env
 
 ### Backend
 
-For development : 
+For development (using hot reload) : 
 ```
 make --directory=./backend dev-build-backend
+```
+
+```
+make --directory=./backend start-reload-backend
 
 ```
 
