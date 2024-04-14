@@ -8,7 +8,7 @@ dev-build-backend: ## Build service image - dev version
 	docker build --tag=$(IMAGE):$(TAG) -f dev.Dockerfile .
 	docker build --tag=$(SOLUTIONS_AGENT_IMAGE):$(SOLUTIONS_AGENT_TAG) ../solutionAgent
 
-prod-build-backend: ## Build service image - dev version
+prod-build-backend: ## Build service image - prod version
 	docker build --tag=$(IMAGE):$(TAG) .
 	docker build --tag=$(SOLUTIONS_AGENT_IMAGE):$(SOLUTIONS_AGENT_TAG) ../solutionAgent
 
