@@ -56,7 +56,7 @@ func CallPredictionAgentService(jsonData []byte) (analysisResponse models.IssueA
 }
 
 func CompareLogs(incomingLogTails []string, currentIssuesLogTails []string) (isNewIssue bool) {
-	const LogSimilarityThreshold = 0.6
+	const LogSimilarityThreshold = 0.644
 
 	isNewIssue = true
 	sdm := metrics.NewSorensenDice()
