@@ -1,6 +1,6 @@
 module signalone
 
-go 1.19
+go 1.22
 
 require (
 	github.com/adrg/strutil v0.3.1
