@@ -12,9 +12,6 @@ prod-build-backend: ## Build service image - prod version
 	docker build --tag=$(IMAGE):$(TAG) .
 	docker build --tag=$(SOLUTIONS_AGENT_IMAGE):$(SOLUTIONS_AGENT_TAG) ../solutionAgent
 
-start-reload-backend: ## Start service locally (local development only)
-	docker compose -f ./docker-compose.devreload.yaml up -d
-
 start-backend: ## Start service locally (local development only)
 	docker compose -f ./docker-compose.dev.yaml up -d
 
