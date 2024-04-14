@@ -315,6 +315,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "INVALID_EMAIL"})
+		return
 	}
 
 	user = models.User{
