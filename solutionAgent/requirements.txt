@@ -7,3 +7,4 @@ python-dotenv
 uvicorn
 huggingface-hub==0.20.3
 fastapi
+langchain-openai

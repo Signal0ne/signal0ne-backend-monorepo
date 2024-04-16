@@ -125,7 +125,10 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			PredictedSolutionsSources: []string{},
 		})
 
-		data := map[string]string{"logs": strings.Join(formattedAnalysisRelevantLogs, "\n")}
+		data := map[string]any{
+			"logs":      strings.Join(formattedAnalysisRelevantLogs, "\n"),
+			"isUserPro": user.IsPro,
+		}
 		jsonData, _ := json.Marshal(data)
 		analysisResponse, err = utils.CallPredictionAgentService(jsonData)
 		if err != nil {

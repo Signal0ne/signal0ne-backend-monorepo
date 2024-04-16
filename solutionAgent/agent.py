@@ -9,13 +9,34 @@ from langchain.agents import initialize_agent, Tool, create_react_agent, AgentEx
 from langchain.agents import AgentType
 from webcrawler import WebCrawler
 from dotenv import load_dotenv
-from openai import OpenAI
+from langchain_openai import OpenAI
 from datetime import datetime
 
 class ChatAgent:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, tier):
+        self.tier = tier
         load_dotenv()
+        if tier == 1:
+            self.__init_tier1(endpoint=endpoint)
+        elif tier == 2:
+            self.__init_tier2(endpoint=endpoint)
+
+
+        self.webcrawler = WebCrawler()
+        self.tools = [
+                    Tool(
+                        name="websearch",
+                        func=self.webcrawler.search,
+                        description="useful for when you need to search for a specific topic on the web, use the query parameter to specify the what to search",
+                    )
+                    ]
+        
+        prompt = hub.pull("hwchase17/react")
+        agent = create_react_agent(self.llm, self.tools, prompt)
+        self.agent_executor = AgentExecutor(agent=agent, tools=self.tools, verbose=False, handle_parsing_errors=True,return_intermediate_steps=True, max_iterations=3)
+     
+    def __init_tier1(self, endpoint):
         self.llm = HuggingFaceEndpoint(
                 endpoint_url=endpoint,
                 task="text-generation",
@@ -46,19 +67,32 @@ class ChatAgent:
                     "repetition_penalty": 1.1,
                 },
             )
-        self.webcrawler = WebCrawler()
-        self.tools = [
-                    Tool(
-                        name="websearch",
-                        func=self.webcrawler.search,
-                        description="useful for when you need to search for a specific topic on the web, use the query parameter to specify the what to search",
-                    )
-                    ]
-        
-        prompt = hub.pull("hwchase17/react")
-        agent = create_react_agent(self.llm, self.tools, prompt)
-        self.agent_executor = AgentExecutor(agent=agent, tools=self.tools, verbose=False, handle_parsing_errors=True,return_intermediate_steps=True, max_iterations=3)
-     
+
+    def __init_tier2(self, endpoint):
+        load_dotenv()
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.llm = OpenAI(
+                openai_api_key=openai_api_key,
+                model_name=endpoint,
+                max_tokens=1512,
+                temperature=0.4,
+                frequency_penalty=1.1,
+        )
+        self.summarizer = OpenAI(
+                openai_api_key=openai_api_key,
+                model_name=endpoint,
+                max_tokens=1100,
+                temperature=0.3,
+                frequency_penalty=1.1,
+        )
+        self.title_gen = OpenAI(
+                openai_api_key=openai_api_key,
+                model_name=endpoint,
+                max_tokens=1060,
+                temperature=0.5,
+                frequency_penalty=1.1,
+        )
+    
     def understand_logs(self,logs):
         """Function to understand logs and return a summary
         Args:
