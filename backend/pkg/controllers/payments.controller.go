@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
+	billingPortal "github.com/stripe/stripe-go/v76/billingportal/session"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/subscription"
 	"go.mongodb.org/mongo-driver/bson"
@@ -139,4 +140,43 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 		})
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
+}
+
+func (pc *PaymentController) StripeCreateBillingPortalHandler(ctx *gin.Context) {
+	var user models.User
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	err = utils.GetUser(ctx, pc.usersCollection, bson.M{"userId": userId}, &user)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	stripeCustomer, err := utils.HandleStripeCustomer(user.UserCustomerId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error getting stripe customer"})
+	}
+
+	if stripeCustomer == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "no stripe customer found"})
+		return
+	}
+
+	params := &stripe.BillingPortalSessionParams{
+		Customer:  stripe.String(user.UserCustomerId),
+		ReturnURL: stripe.String("http://localhost:37001"),
+	}
+
+	session, err := billingPortal.New(params)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating billing portal session"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"url": session.URL})
 }
