@@ -51,6 +51,7 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	userRouterGroup := rg.Group("/user", middlewares.CheckAuthorization)
 	{
 		userRouterGroup.POST("/agent/authenticate", mr.integrationAuthController.AuthenticateAgent)
+		userRouterGroup.POST("/complete-upgrade-pro", mr.paymentsController.StripeCheckoutCompleteHandler)
 		userRouterGroup.GET("/containers", mr.userIssuesController.GetContainers)
 		userRouterGroup.GET("/issues", mr.userIssuesController.IssuesSearch)
 		userRouterGroup.GET("/issues/:id", mr.userIssuesController.GetIssue)
@@ -59,10 +60,10 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
 		userRouterGroup.POST("/issues/report", mr.userIssuesController.ReportIssueAnalysis)
 		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
+		userRouterGroup.GET("/manage-pro", mr.paymentsController.StripeCreateBillingPortalHandler)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/upgrade-pro", mr.paymentsController.UpgradeProHandler)
-		userRouterGroup.POST("/complete-upgrade-pro", mr.paymentsController.StripeCheckoutCompleteHandler)
 	}
 
 	agentRouterGroup := rg.Group("/agent", mr.integrationAuthController.CheckAgentAuthorization)
