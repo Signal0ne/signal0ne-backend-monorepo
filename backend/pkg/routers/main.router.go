@@ -38,9 +38,6 @@ func NewMainRouter(mainController *controllers.MainController,
 func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("/contact", mr.mainController.ContactHandler)
 	rg.POST("/waitlist", mr.mainController.WaitlistHandler)
-	// For testing purposes
-	rg.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
-	//
 
 	authorizationRouterGroup := rg.Group("/auth")
 	authorizationRouterGroup.POST("/email-confirmation", mr.userAuthController.VerifyEmail)
@@ -61,6 +58,7 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.PUT("/issues/:id/resolve", mr.userIssuesController.ResolveIssue)
 		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
 		userRouterGroup.POST("/issues/report", mr.userIssuesController.ReportIssueAnalysis)
+		userRouterGroup.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
 		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
 		userRouterGroup.POST("/settings", func(c *gin.Context) {})
