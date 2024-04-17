@@ -143,6 +143,7 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 }
 
 func (pc *PaymentController) StripeCreateBillingPortalHandler(ctx *gin.Context) {
+	const BILLING_PORTAL_RETURN_URL = "http://localhost:37001"
 	var user models.User
 
 	userId, err := utils.GetUserIdFromToken(ctx)
@@ -169,7 +170,7 @@ func (pc *PaymentController) StripeCreateBillingPortalHandler(ctx *gin.Context) 
 
 	params := &stripe.BillingPortalSessionParams{
 		Customer:  stripe.String(user.UserCustomerId),
-		ReturnURL: stripe.String("http://localhost:37001"),
+		ReturnURL: stripe.String(BILLING_PORTAL_RETURN_URL),
 	}
 
 	session, err := billingPortal.New(params)
