@@ -3,6 +3,7 @@ import os
 import json
 from langchain_community.llms import HuggingFaceEndpoint
 from dotenv import load_dotenv
+from utils.utils import parse_json
 
 
 class QueryAgent:
@@ -26,4 +27,5 @@ class QueryAgent:
         Here are the logs: {logs}\n
         Output format is {{"queries": [{{"question":"your question","context":"the context for the question"}}]}}. Json:"""
         result = self.llm(prompt)
+        result = parse_json(result)
         return json.loads(result)

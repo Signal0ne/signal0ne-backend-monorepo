@@ -74,5 +74,4 @@ class GoogleCustomSearch:
                 print(f"Error processing search results: {e}")
                 results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
                 global_index += 1
-        print(f"\n\n\n\nSearch results: {results}")
         return json.dumps(results, indent=4)
