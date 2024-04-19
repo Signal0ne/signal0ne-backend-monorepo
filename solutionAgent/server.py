@@ -17,13 +17,13 @@ class CodeSnippetGen(BaseModel):
     languageId: str
 
 app = FastAPI()
+dotenv.load_dotenv()
+chat_agent = GraphGen(os.getenv('ENDPOINT_URL'))
+backup_chat_agent = GraphGen(os.getenv('BACKUP_ENDPOINT_URL'))
 
 @app.post("/run_analysis")
 async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
-    dotenv.load_dotenv()
-    chat_agent = GraphGen(os.getenv('ENDPOINT_URL'))
-    backup_chat_agent = GraphGen(os.getenv('BACKUP_ENDPOINT_URL'))
     retries = 0
     while True:
         try:
