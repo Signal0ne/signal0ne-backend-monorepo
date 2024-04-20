@@ -55,6 +55,31 @@ func CallPredictionAgentService(jsonData []byte) (analysisResponse models.IssueA
 	return
 }
 
+func CallCodeGenAgentService(jsonData []byte) (analysisResponse models.CodeSnippetResponse, err error) {
+	var cfg = config.GetInstance()
+
+	issueAnalysisReq, err := http.NewRequest("POST", cfg.PredicitonAgentServiceUrl+"/generate_code_snippet", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return
+	}
+	issueAnalysisReq.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(issueAnalysisReq)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	rawAnalysisResponse, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(rawAnalysisResponse, &analysisResponse)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func CompareLogs(incomingLogTails []string, currentIssuesLogTails []string) (isNewIssue bool) {
 	const LogSimilarityThreshold = 0.644
 

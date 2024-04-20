@@ -190,3 +190,46 @@ func (c *IntegrationController) DeleteIssues(ctx *gin.Context) {
 		"count":   res.DeletedCount,
 	})
 }
+
+func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
+	var issue models.Issue
+	var codeContext models.CodeContextRequest
+	id := ctx.Param("id")
+
+	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
+		fmt.Printf("Error: %s", err)
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := c.issuesCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&issue); err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	formattedAnalysisLogs := issue.Logs
+	formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
+	if formattedAnalysisRelevantLogs == nil {
+		formattedAnalysisRelevantLogs = formattedAnalysisLogs
+	}
+
+	codeSnippetRequest := models.CodeSnippetRequest{
+		CurrentCodeSnippet: codeContext.Code,
+		Logs:               strings.Join(formattedAnalysisRelevantLogs, "\n"),
+		PredictedSolutions: issue.PredictedSolutionsSummary,
+		LanguageId:         codeContext.Lang,
+	}
+
+	jsonData, _ := json.Marshal(codeSnippetRequest)
+	analysisResponse, err := utils.CallCodeGenAgentService(jsonData)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "Success",
+		"newCode": analysisResponse.Code,
+	})
+
+}
