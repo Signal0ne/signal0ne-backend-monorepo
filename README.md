@@ -27,7 +27,7 @@ make --directory=./backend dev-build-backend
 ```
 
 ```
-make --directory=./backend start-reload-backend
+make --directory=./backend start-backend
 
 ```
 
@@ -37,9 +37,5 @@ make --directory=./backend prod-build-backend
 
 ```
 ```
-make --directory=./backend start-backend
-```
-OR
-```
-make --directory=./backend start-backend-with-init # to start backend with init sample development data
+make --directory=./backend deploy-backend
 ```
