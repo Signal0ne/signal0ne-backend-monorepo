@@ -19,7 +19,7 @@ class AnswerGenerator:
         """Generate answer from the logs and context."""
         logs = kwargs.get("logs", "")
         context = args[0] if args else {}
-        urls = [item['url'] for item in context if 'url' in item]
+        urls = list(set([item['url'] for item in context if 'url' in item]))
         answer_prompt = f"""System: You are a helpful technical assistant whose job is to help solve
         the error in the logs using logs and relevant context given. Use the context provided to help the user
         to solve the error in the logs. Take a note of the what the context says and what  
