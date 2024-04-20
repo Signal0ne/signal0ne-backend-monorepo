@@ -33,5 +33,5 @@ async def run_chat_agent(data: LogData):
             if retries > 4:
                 print(f"Unable to process the logs, error: {e}")
                 return {"error": f"Unable to process the logs, error: {e}"}
-            return None
+            return result
         
