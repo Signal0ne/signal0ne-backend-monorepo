@@ -8,6 +8,7 @@ from agents.code_gen import CodeGen
 class LogData(BaseModel):
     '''Class for the log data'''
     logs: str
+    isUserPro: bool
 
 class CodeSnippetGen(BaseModel):
     '''Class for the code snippet generation'''
@@ -28,11 +29,12 @@ async def run_chat_agent(data: LogData):
     while True:
         try:
             print(f"Number of retries {retries}")
-            retries =retries + 1
+            retries = retries + 1
+            print(f"Processing agent tier {chat_agent.tier}")
             result = chat_agent.run(data.logs)
             return result
         except Exception as e:
-            print(f"Unable to process the logs, error: {e}")
+            print(f"Unable to process the logs, error: {e} ... retrying")
             result = backup_chat_agent.run(data.logs)
             return result
         

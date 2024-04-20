@@ -11,6 +11,7 @@ type User struct {
 	Counter          int32  `json:"counter" bson:"counter"`
 	Type             string `json:"type" bson:"type"`
 	Email            string `json:"email" bson:"email"`
+	ProTierProductId string `json:"proTierProductId" bson:"proTierProductId"`
 
 	//If user type is signalone
 	PasswordHash          string `json:"passwordHash" bson:"passwordHash"`

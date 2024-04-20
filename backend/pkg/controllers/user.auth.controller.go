@@ -49,6 +49,10 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 
 	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
 
+	if user.IsPro {
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
+	}
+
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -144,6 +148,10 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 		}
 	}
 
+	if user.IsPro {
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
+	}
+
 	if user.Email != claims.Email {
 		_, err = c.usersCollection.UpdateOne(ctx,
 			bson.M{"userId": claims.Subject},
@@ -197,6 +205,10 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 	} else if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
+	}
+
+	if user.IsPro {
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 	}
 
 	if !utils.ComparePasswordHashes(user.PasswordHash, loginData.Password) {
@@ -303,6 +315,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"descriptionKey": "INVALID_EMAIL"})
+		return
 	}
 
 	user = models.User{
@@ -429,13 +442,22 @@ func (c *UserAuthController) ResendConfirmationEmail(ctx *gin.Context) {
 }
 
 func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
-	var cfg = config.GetInstance()
+	const RefreshTokenExpirationDeltaThreshold = 3600 * 2
 	var claims = &models.JWTClaimsWithUserData{}
+	var cfg = config.GetInstance()
 	var data models.RefreshTokenRequest
+	var user models.User
+	var refreshTokenString string
 	var SECRET_KEY = []byte(cfg.SignalOneSecret)
 
 	if err := ctx.ShouldBindJSON(&data); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userId, err := utils.VerifyToken(data.RefreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		return
 	}
 
@@ -453,13 +475,29 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		return
 	}
 
-	accessTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "access")
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
-		return
+	expirationDelta := utils.GetTokenExpirationDateInUnixFormat(data.RefreshToken) - time.Now().Unix()
+	if expirationDelta >= 0 && expirationDelta < RefreshTokenExpirationDeltaThreshold {
+
+		err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			return
+		}
+
+		if user.IsPro {
+			utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
+		}
+
+		refreshTokenString, err = utils.CreateToken(claims.Id, claims.UserName, "refresh")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
+			return
+		}
+	} else {
+		refreshTokenString = data.RefreshToken
 	}
 
-	refreshTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "refresh")
+	accessTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "access")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return

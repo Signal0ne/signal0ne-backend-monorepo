@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
@@ -58,7 +57,6 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 
 	var logAnalysisPayload LogAnalysisPayload
 	if err := ctx.ShouldBindJSON(&logAnalysisPayload); err != nil {
-		fmt.Printf("Error: %s", err)
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -91,7 +89,6 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			"isResolved":  false,
 		}, qOpts)
 		if err != nil {
-			fmt.Printf("Error: %v", err)
 			return
 		}
 
@@ -128,11 +125,13 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			PredictedSolutionsSources: []string{},
 		})
 
-		data := map[string]string{"logs": strings.Join(formattedAnalysisRelevantLogs, "\n")}
+		data := map[string]any{
+			"logs":      strings.Join(formattedAnalysisRelevantLogs, "\n"),
+			"isUserPro": user.IsPro,
+		}
 		jsonData, _ := json.Marshal(data)
 		analysisResponse, err = utils.CallPredictionAgentService(jsonData)
 		if err != nil {
-			fmt.Printf("Error: %v", err)
 			return
 		}
 
