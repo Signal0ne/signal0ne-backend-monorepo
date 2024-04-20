@@ -9,12 +9,12 @@ from langchain.agents import initialize_agent, Tool, create_react_agent, AgentEx
 from langchain.agents import AgentType
 from webcrawler import WebCrawler
 from dotenv import load_dotenv
-from openai import OpenAI
 from datetime import datetime
 
 class ChatAgent:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint, tier):
+        self.tier = tier
         load_dotenv()
         self.llm = HuggingFaceEndpoint(
                 endpoint_url=endpoint,
@@ -46,6 +46,8 @@ class ChatAgent:
                     "repetition_penalty": 1.1,
                 },
             )
+
+
         self.webcrawler = WebCrawler()
         self.tools = [
                     Tool(
@@ -58,7 +60,7 @@ class ChatAgent:
         prompt = hub.pull("hwchase17/react")
         agent = create_react_agent(self.llm, self.tools, prompt)
         self.agent_executor = AgentExecutor(agent=agent, tools=self.tools, verbose=False, handle_parsing_errors=True,return_intermediate_steps=True, max_iterations=3)
-     
+    
     def understand_logs(self,logs):
         """Function to understand logs and return a summary
         Args:
