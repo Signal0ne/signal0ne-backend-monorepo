@@ -90,13 +90,13 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 		}
 	}
 
-	accessTokenString, err := utils.CreateToken(user.UserId, user.UserName, "access")
+	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
 	}
 
-	refreshTokenString, err := utils.CreateToken(user.UserId, user.UserName, "refresh")
+	refreshTokenString, err := utils.CreateToken(user, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
@@ -167,13 +167,13 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 		}
 	}
 
-	accessTokenString, err := utils.CreateToken(user.UserId, user.UserName, "access")
+	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
 	}
 
-	refreshTokenString, err := utils.CreateToken(user.UserId, user.UserName, "refresh")
+	refreshTokenString, err := utils.CreateToken(user, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
@@ -221,13 +221,13 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
-	accessTokenString, err := utils.CreateToken(user.UserId, user.UserName, "access")
+	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
 	}
 
-	refreshTokenString, err := utils.CreateToken(user.UserId, user.UserName, "refresh")
+	refreshTokenString, err := utils.CreateToken(user, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
@@ -289,7 +289,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 	}
 
 	userId := uuid.New().String()
-	confirmationToken, err := utils.CreateToken(userId, loginData.Email, "refresh")
+	confirmationToken, err := utils.CreateToken(user, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
@@ -399,7 +399,7 @@ func (c *UserAuthController) ResendConfirmationEmail(ctx *gin.Context) {
 		return
 	}
 
-	confirmationToken, err := utils.CreateToken(user.UserId, user.UserName, "refresh")
+	confirmationToken, err := utils.CreateToken(user, "refresh")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "ERROR_OCCURED"})
 		return
@@ -488,7 +488,7 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 			utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 		}
 
-		refreshTokenString, err = utils.CreateToken(claims.Id, claims.UserName, "refresh")
+		refreshTokenString, err = utils.CreateToken(user, "refresh")
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 			return
@@ -497,7 +497,7 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		refreshTokenString = data.RefreshToken
 	}
 
-	accessTokenString, err := utils.CreateToken(claims.Id, claims.UserName, "access")
+	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
 		return
