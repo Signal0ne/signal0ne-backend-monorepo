@@ -8,13 +8,13 @@ from utils.utils import parse_json
 
 class CodeGen:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint,tier):
         load_dotenv()
         openai_api_key = os.getenv("OPENAI_API_KEY")
         self.llm = OpenAI(
                 openai_api_key=openai_api_key,
                 model_name=endpoint,
-                max_tokens=1512,
+                max_tokens=512,
                 temperature=0.4,
                 frequency_penalty=1.1,
         )

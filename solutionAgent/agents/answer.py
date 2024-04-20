@@ -1,19 +1,31 @@
 """Module for AnswerGenerator class"""
+import os
 from langchain_community.llms import HuggingFaceEndpoint
 from dotenv import load_dotenv
+from langchain_openai.llms import OpenAI
+
 class AnswerGenerator:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint,tier):
         load_dotenv()
         self.endpoint = endpoint
-        self.llm = HuggingFaceEndpoint(
-            endpoint_url=self.endpoint,
-            task="text-generation",
-            max_new_tokens=512,
-            top_k=50,
-            temperature=0.3,
-            repetition_penalty=1.1,
-        )
+        if tier == 2:
+            self.llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                name=endpoint,
+                temperature=0.3,
+                max_tokens=512,
+                frequency_penalty=1.1
+            )
+        else:
+            self.llm = HuggingFaceEndpoint(
+                endpoint_url=self.endpoint,
+                task="text-generation",
+                max_new_tokens=512,
+                top_k=50,
+                temperature=0.3,
+                repetition_penalty=1.1,
+            )
 
     def generate_answer(self, *args, **kwargs):
         """Generate answer from the logs and context."""

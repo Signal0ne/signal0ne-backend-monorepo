@@ -2,22 +2,33 @@
 import os
 import json
 from langchain_community.llms import HuggingFaceEndpoint
+from langchain_openai.llms import OpenAI
 from dotenv import load_dotenv
 from utils.utils import parse_json
 
 
 class QueryAgent:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint,tier):
         load_dotenv()
-        self.llm = HuggingFaceEndpoint(
-            endpoint_url=endpoint,
-            task="text-generation",
-            max_new_tokens=512,
-            top_k=50,
-            temperature=0.4,
-            repetition_penalty=1.1,
-        )
+        
+        if tier == 2:
+            self.llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                name=endpoint,
+                temperature=0.4,
+                max_tokens=512,
+                frequency_penalty=1.1
+            )
+        else:
+            self.llm = HuggingFaceEndpoint(
+                endpoint_url=endpoint,
+                task="text-generation",
+                max_new_tokens=512,
+                top_k=50,
+                temperature=0.4,
+                repetition_penalty=1.1,
+            )
         
     def gen_ques(self, logs):
         """Generate questions from the logs."""

@@ -19,13 +19,15 @@ class CodeSnippetGen(BaseModel):
 
 app = FastAPI()
 dotenv.load_dotenv()
-chat_agent = GraphGen(os.getenv('ENDPOINT_URL'))
+master_agent = GraphGen(os.getenv('ENDPOINT_URL'))
+master_agent_tier2 = GraphGen(os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
 backup_chat_agent = GraphGen(os.getenv('BACKUP_ENDPOINT_URL'))
 
 @app.post("/run_analysis")
 async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
     retries = 0
+    chat_agent = master_agent if data.isUserPro else master_agent_tier2
     while True:
         try:
             print(f"Number of retries {retries}")

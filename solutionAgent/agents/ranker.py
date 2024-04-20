@@ -4,21 +4,31 @@ import json
 import re
 from typing import List
 from langchain_community.llms import HuggingFaceEndpoint
+from langchain_openai.llms import OpenAI
 from dotenv import load_dotenv
 
 
 class RankAgent:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint,tier):
         load_dotenv()
-        self.llm = HuggingFaceEndpoint(
-            endpoint_url=endpoint,
-            task="text-generation",
-            max_new_tokens=100,
-            top_k=30,
-            temperature=0.3,
-            repetition_penalty=1.1,
-        )
+        if tier == 2:
+            self.llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                name=endpoint,
+                temperature=0.4,
+                max_tokens=100,
+                frequency_penalty=1.1
+            )
+        else:
+            self.llm = HuggingFaceEndpoint(
+                endpoint_url=endpoint,
+                task="text-generation",
+                max_new_tokens=100,
+                top_k=30,
+                temperature=0.3,
+                repetition_penalty=1.1,
+            )
         
     def rank(self, outputs, logs):
         """Generate questions from the logs."""
