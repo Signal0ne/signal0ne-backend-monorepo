@@ -197,7 +197,6 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
-		fmt.Printf("Error: %s", err)
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -223,7 +222,6 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	jsonData, _ := json.Marshal(codeSnippetRequest)
 	analysisResponse, err := utils.CallCodeGenAgentService(jsonData)
 	if err != nil {
-		fmt.Printf("Error: %v", err)
 		return
 	}
 
