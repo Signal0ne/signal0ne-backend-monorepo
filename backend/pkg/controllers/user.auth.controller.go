@@ -475,26 +475,20 @@ func (c *UserAuthController) RefreshTokenHandler(ctx *gin.Context) {
 		return
 	}
 
-	expirationDelta := utils.GetTokenExpirationDateInUnixFormat(data.RefreshToken) - time.Now().Unix()
-	if expirationDelta >= 0 && expirationDelta < RefreshTokenExpirationDeltaThreshold {
+	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
 
-		err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": userId}, &user)
-		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
-			return
-		}
+	if user.IsPro {
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
+	}
 
-		if user.IsPro {
-			utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
-		}
-
-		refreshTokenString, err = utils.CreateToken(user, "refresh")
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
-			return
-		}
-	} else {
-		refreshTokenString = data.RefreshToken
+	refreshTokenString, err = utils.CreateToken(user, "refresh")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "couldn't make authentication token"})
+		return
 	}
 
 	accessTokenString, err := utils.CreateToken(user, "access")
