@@ -26,7 +26,7 @@ class CodeGen:
         Your return type is json newline must be \\n.
         Here are the logs: {logs} caused by issue in code fix it\n
         Here is the broken code: {current_code}\n
-        Here is additional context on the issue and proposed solutions bu other engineer: {predicted_solutions}\n
+        Here is additional context on the issue and proposed solutions by other engineer: {predicted_solutions}\n
         Your output format is {{"code":"your code snippet"}}. Json:"""
         result = self.llm(prompt)
         result = parse_json(result)
