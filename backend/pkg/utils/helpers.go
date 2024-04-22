@@ -105,31 +105,19 @@ func FilterForRelevantLogs(logs []string) []string {
 	//have different log structures
 	// Class 0 = Error or Warning message
 	issueClassZeroRegex := `(?i)(abort|blocked|corrupt|crash|critical|deadlock|
-		denied|deprecated|deprecating|err|error|exception|fatal|forbidden|
+		denied|err|error|exception|fatal|forbidden|
 		freeze|hang|illegal|invalid|missing|panic|refused|rejected|stacktrace|
-		timeout|traceback|unauthorized|uncaught|undefined|unhandled|unsupported|warn|warning)`
+		timeout|traceback|unauthorized|uncaught|undefined|unhandled|unsupported)`
+	issueClassOneregex := `(?i)(deprecated|deprecating|warn|warning)`
 
 	compiledClassZeroRegex := regexp.MustCompile(issueClassZeroRegex)
+	compiledClassOneRegex := regexp.MustCompile(issueClassOneregex)
 
-	for logIndex, log := range logs {
-		if len(relevantLogs) != 0 {
-			for _, relevantLog := range relevantLogs {
-				if log == relevantLog {
-					continue
-				}
-			}
-		}
-		if matched := compiledClassZeroRegex.MatchString(log); matched {
-			relevantLogs = append(relevantLogs, logs[logIndex])
-			//Add the next and previous log to the relevant logs if stack trace is found
-			//To be improved
-			if logIndex+1 < len(logs) {
-				relevantLogs = append(relevantLogs, logs[logIndex+1])
-			}
-			if logIndex-1 >= 0 {
-				relevantLogs = append(relevantLogs, logs[logIndex-1])
-			}
-		}
+	globalLoopMatched := false
+
+	globalLoopMatched = executeRelevantLogsLoopComponent(logs, &relevantLogs, compiledClassZeroRegex)
+	if !globalLoopMatched {
+		executeRelevantLogsLoopComponent(logs, &relevantLogs, compiledClassOneRegex)
 	}
 
 	return relevantLogs
@@ -199,4 +187,30 @@ func MaskSecrets(data string) string {
 	data = compiledJWTRegex.ReplaceAllString(data, "[REDUCTED]")
 
 	return data
+}
+
+func executeRelevantLogsLoopComponent(logs []string, relevantLogs *[]string, regEx *regexp.Regexp) bool {
+	var globalLoopMatched = false
+	for logIndex, log := range logs {
+		if len(*relevantLogs) != 0 {
+			for _, relevantLog := range *relevantLogs {
+				if log == relevantLog {
+					continue
+				}
+			}
+		}
+		if matched := regEx.MatchString(log); matched {
+			*relevantLogs = append(*relevantLogs, logs[logIndex])
+			globalLoopMatched = true
+			//Add the next and previous log to the relevant logs if stack trace is found
+			//To be improved
+			if logIndex+1 < len(logs) {
+				*relevantLogs = append(*relevantLogs, logs[logIndex+1])
+			}
+			if logIndex-1 >= 0 {
+				*relevantLogs = append(*relevantLogs, logs[logIndex-1])
+			}
+		}
+	}
+	return globalLoopMatched
 }
