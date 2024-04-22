@@ -8,13 +8,13 @@ from utils.utils import parse_json
 
 class CodeGen:
     """Class for the chat agent."""
-    def __init__(self, endpoint):
+    def __init__(self, endpoint,tier):
         load_dotenv()
         openai_api_key = os.getenv("OPENAI_API_KEY")
         self.llm = OpenAI(
                 openai_api_key=openai_api_key,
                 model_name=endpoint,
-                max_tokens=1512,
+                max_tokens=512,
                 temperature=0.4,
                 frequency_penalty=1.1,
         )
@@ -26,7 +26,7 @@ class CodeGen:
         Your return type is json newline must be \\n.
         Here are the logs: {logs} caused by issue in code fix it\n
         Here is the broken code: {current_code}\n
-        Here is additional context on the issue and proposed solutions bu other engineer: {predicted_solutions}\n
+        Here is additional context on the issue and proposed solutions by other engineer: {predicted_solutions}\n
         Your output format is {{"code":"your code snippet"}}. Json:"""
         result = self.llm(prompt)
         result = parse_json(result)
