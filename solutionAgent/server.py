@@ -24,7 +24,10 @@ dotenv.load_dotenv()
 async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
     retries = 0
-    chat_agent = GraphGen(os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
+    if data.isUserPro:
+        chat_agent = GraphGen(os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
+    else:
+        chat_agent = GraphGen(os.getenv('TIER1_MODEL_ENDPOINT'))
     while True:
         try:
             print(f"Number of retries {retries}")
