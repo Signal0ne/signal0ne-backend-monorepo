@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/stripe/stripe-go/v76"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -140,9 +141,11 @@ func main() {
 	routeController.RegisterRoutes(router)
 
 	if cfg.Mode == "local" {
+		stripe.Key = cfg.StripeApiKeyTest
 		server.Run(":" + cfg.ServerPort)
 	}
 	if cfg.Mode == "prod" {
+		stripe.Key = cfg.StripeApiKeyProd
 		server.RunTLS(":"+cfg.ServerPort, cfg.CertFilePath, cfg.KeyFilePath)
 	}
 }

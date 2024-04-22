@@ -34,10 +34,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 	var user models.User
 
 	cfg := config.GetInstance()
-	stripe.Key = cfg.StripeApiKeyProd
-	if cfg.Mode == "local" {
-		stripe.Key = cfg.StripeApiKeyTest
-	}
+
 	stripeProductId := cfg.StripeProductIdProd
 	if cfg.Mode == "local" {
 		stripeProductId = cfg.StripeProductIdTest

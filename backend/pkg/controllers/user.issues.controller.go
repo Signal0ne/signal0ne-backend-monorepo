@@ -178,6 +178,23 @@ func (c *UserIssuesController) GetIssue(ctx *gin.Context) {
 		return
 	}
 
+	updatedIssueResult, err := c.issuesCollection.UpdateOne(ctx,
+		bson.M{"_id": id},
+		bson.M{
+			"$set": bson.M{
+				"viewCount": issue.ViewCount + 1,
+			},
+		})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if updatedIssueResult.MatchedCount == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Issue cannot be found"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, issue)
 }
 

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"signalone/cmd/config"
 	"signalone/pkg/models"
 
 	"github.com/gin-gonic/gin"
@@ -22,8 +21,7 @@ func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
 
 func VerifyProTierSubscription(ctx *gin.Context, user models.User, usersCollection *mongo.Collection) {
 	var proConfirmed bool = false
-	var cfg = config.GetInstance()
-	stripe.Key = cfg.StripeApiKeyTest
+
 	subscriptions := subscription.List(&stripe.SubscriptionListParams{Customer: stripe.String(user.UserCustomerId)})
 	for _, sub := range subscriptions.SubscriptionList().Data {
 		stripeSubscription, _ := subscription.Get(sub.ID, nil)

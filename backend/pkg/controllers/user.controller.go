@@ -40,3 +40,51 @@ func (c *UserController) LastActivityHandler(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
 }
+
+func (c *UserController) MetricsProButtonClickHandler(ctx *gin.Context) {
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	filter := bson.D{{Key: "userId", Value: userId}}
+	update := bson.D{{Key: "$inc", Value: bson.D{{Key: "metrics.proButtonClicksCount", Value: 1}}}}
+
+	updatedUserResult, err := c.usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if updatedUserResult.MatchedCount == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User cannot be found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
+}
+
+func (c *UserController) MetricsProCheckoutClickHandler(ctx *gin.Context) {
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	filter := bson.D{{Key: "userId", Value: userId}}
+	update := bson.D{{Key: "$inc", Value: bson.D{{Key: "metrics.proCheckoutClicksCount", Value: 1}}}}
+
+	updatedUserResult, err := c.usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if updatedUserResult.MatchedCount == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User cannot be found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
+}
