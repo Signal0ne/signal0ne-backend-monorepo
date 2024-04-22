@@ -31,7 +31,7 @@ func GetUserIdFromToken(ctx *gin.Context) (string, error) {
 	return userId, nil
 }
 
-func CreateToken(id string, userName string, tokenType string) (string, error) {
+func CreateToken(user models.User, tokenType string) (string, error) {
 	var cfg = config.GetInstance()
 	var expTime time.Duration
 	var SECRET_KEY = []byte(cfg.SignalOneSecret)
@@ -47,8 +47,10 @@ func CreateToken(id string, userName string, tokenType string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"exp":      time.Now().Add(expTime).Unix(),
-			"id":       id,
-			"userName": userName,
+			"id":       user.UserId,
+			"userName": user.UserName,
+			"email":    user.Email,
+			"isPro":    user.IsPro,
 		})
 
 	tokenString, err := token.SignedString(SECRET_KEY)

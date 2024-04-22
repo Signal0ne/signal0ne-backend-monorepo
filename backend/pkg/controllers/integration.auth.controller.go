@@ -52,7 +52,7 @@ func (c *IntegrationAuthController) AuthenticateAgent(ctx *gin.Context) {
 		return
 	}
 
-	token, err := utils.CreateToken(userId, user.UserName, "")
+	token, err := utils.CreateToken(user, "")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
