@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"signalone/pkg/models"
 	"signalone/pkg/utils"
 	"time"
 
@@ -35,6 +36,39 @@ func (c *UserController) LastActivityHandler(ctx *gin.Context) {
 	)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
+}
+
+func (c *UserController) MetricsOverallScoreHandler(ctx *gin.Context) {
+	var overallScoreRequest models.OverallScoreRequest
+
+	if err := ctx.ShouldBindJSON(&overallScoreRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	filter := bson.M{"userId": userId}
+	update := bson.M{"$set": bson.M{
+		"metrics.overallScore": *overallScoreRequest.OverallScore,
+	}}
+
+	updatedUserResult, err := c.usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if updatedUserResult.MatchedCount == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User cannot be found"})
 		return
 	}
 

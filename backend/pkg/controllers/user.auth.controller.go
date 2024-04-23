@@ -68,6 +68,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 			Counter:          0,
 			Type:             "github",
 			Metrics: models.UserMetrics{
+				OverallScore:           -1,
 				ProButtonClicksCount:   0,
 				ProCheckoutClicksCount: 0,
 			},
@@ -144,6 +145,7 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 			Counter:          0,
 			Type:             "google",
 			Metrics: models.UserMetrics{
+				OverallScore:           -1,
 				ProButtonClicksCount:   0,
 				ProCheckoutClicksCount: 0,
 			},
@@ -338,6 +340,7 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 		EmailConfirmed:        false,
 		EmailConfirmationCode: confirmationToken,
 		Metrics: models.UserMetrics{
+			OverallScore:           -1,
 			ProButtonClicksCount:   0,
 			ProCheckoutClicksCount: 0,
 		},

@@ -21,6 +21,7 @@ type User struct {
 }
 
 type UserMetrics struct {
+	OverallScore           int32 `json:"overallScore" bson:"overallScore"`
 	ProButtonClicksCount   int32 `json:"proButtonClicksCount" bson:"proButtonClicksCount"`
 	ProCheckoutClicksCount int32 `json:"proCheckoutClicksCount" bson:"proCheckoutClicksCount"`
 }
@@ -109,4 +110,8 @@ type Email struct {
 	Email          string `json:"email" binding:"required"`
 	MessageContent string `json:"messageContent" binding:"required"`
 	MessageTitle   string `json:"messageTitle" binding:"required"`
+}
+
+type OverallScoreRequest struct {
+	OverallScore *int32 `json:"overallScore" binding:"min=0,max=10"`
 }
