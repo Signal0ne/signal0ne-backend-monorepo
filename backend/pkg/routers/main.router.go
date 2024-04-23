@@ -72,4 +72,11 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		agentRouterGroup.DELETE("/issues/:containerId", mr.integrationController.DeleteIssues)
 		agentRouterGroup.PUT("/issues/analysis", mr.integrationController.LogAnalysisTask)
 	}
+
+	metricsRouterGroup := rg.Group("/metrics", middlewares.CheckAuthorization)
+	{
+		metricsRouterGroup.POST("/overall-score", mr.userController.MetricsOverallScoreHandler)
+		metricsRouterGroup.GET("/pro-btn-clicks", mr.userController.MetricsProButtonClickHandler)
+		metricsRouterGroup.GET("/pro-checkout-clicks", mr.userController.MetricsProCheckoutClickHandler)
+	}
 }

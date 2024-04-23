@@ -3,20 +3,27 @@ package models
 import "github.com/golang-jwt/jwt/v5"
 
 type User struct {
-	UserId           string `json:"userId" bson:"userId"`
-	UserName         string `json:"userName" bson:"userName"`
-	UserCustomerId   string `json:"userCustomerId" bson:"userCustomerId"`
-	IsPro            bool   `json:"isPro" bson:"isPro"`
-	AgentBearerToken string `json:"agentBearerToken" bson:"agentBearerToken"`
-	Counter          int32  `json:"counter" bson:"counter"`
-	Type             string `json:"type" bson:"type"`
-	Email            string `json:"email" bson:"email"`
-	ProTierProductId string `json:"proTierProductId" bson:"proTierProductId"`
+	UserId           string      `json:"userId" bson:"userId"`
+	UserName         string      `json:"userName" bson:"userName"`
+	UserCustomerId   string      `json:"userCustomerId" bson:"userCustomerId"`
+	IsPro            bool        `json:"isPro" bson:"isPro"`
+	AgentBearerToken string      `json:"agentBearerToken" bson:"agentBearerToken"`
+	Counter          int32       `json:"counter" bson:"counter"`
+	Type             string      `json:"type" bson:"type"`
+	Email            string      `json:"email" bson:"email"`
+	ProTierProductId string      `json:"proTierProductId" bson:"proTierProductId"`
+	Metrics          UserMetrics `json:"metrics" bson:"metrics"`
 
 	//If user type is signalone
 	PasswordHash          string `json:"passwordHash" bson:"passwordHash"`
 	EmailConfirmed        bool   `json:"emailConfirmed" bson:"emailConfirmed"`
 	EmailConfirmationCode string `json:"emailConfirmationCode" bson:"emailConfirmationCode"`
+}
+
+type UserMetrics struct {
+	OverallScore           int32 `json:"overallScore" bson:"overallScore"`
+	ProButtonClicksCount   int32 `json:"proButtonClicksCount" bson:"proButtonClicksCount"`
+	ProCheckoutClicksCount int32 `json:"proCheckoutClicksCount" bson:"proCheckoutClicksCount"`
 }
 
 type SignalAccountRequest struct {
@@ -103,4 +110,8 @@ type Email struct {
 	Email          string `json:"email" binding:"required"`
 	MessageContent string `json:"messageContent" binding:"required"`
 	MessageTitle   string `json:"messageTitle" binding:"required"`
+}
+
+type OverallScoreRequest struct {
+	OverallScore *int32 `json:"overallScore" binding:"min=0,max=10"`
 }

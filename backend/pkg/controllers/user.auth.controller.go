@@ -67,6 +67,11 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 			AgentBearerToken: "",
 			Counter:          0,
 			Type:             "github",
+			Metrics: models.UserMetrics{
+				OverallScore:           -1,
+				ProButtonClicksCount:   0,
+				ProCheckoutClicksCount: 0,
+			},
 		}
 
 		_, err = c.usersCollection.InsertOne(ctx, user)
@@ -139,6 +144,11 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 			AgentBearerToken: "",
 			Counter:          0,
 			Type:             "google",
+			Metrics: models.UserMetrics{
+				OverallScore:           -1,
+				ProButtonClicksCount:   0,
+				ProCheckoutClicksCount: 0,
+			},
 		}
 
 		_, err = c.usersCollection.InsertOne(ctx, user)
@@ -329,6 +339,11 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 		Type:                  "signalone",
 		EmailConfirmed:        false,
 		EmailConfirmationCode: confirmationToken,
+		Metrics: models.UserMetrics{
+			OverallScore:           -1,
+			ProButtonClicksCount:   0,
+			ProCheckoutClicksCount: 0,
+		},
 	}
 	_, err = c.usersCollection.InsertOne(ctx, user)
 	if err != nil {
