@@ -3,7 +3,7 @@ import os
 import json
 import re
 from typing import List
-from langchain_community.llms import HuggingFaceEndpoint
+from langchain_openai import ChatOpenAI
 from langchain_openai.llms import OpenAI
 from dotenv import load_dotenv
 
@@ -14,7 +14,7 @@ class RankAgent:
         load_dotenv()
         self.tier = tier
         if tier == 2:
-            self.llm = OpenAI(
+            self.llm = ChatOpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
                 name=endpoint,
                 temperature=0.4,
@@ -79,6 +79,9 @@ class RankAgent:
     
     def __execute(self, formatted_prompt: str):
         if self.tier == 2:
-            return self.llm(formatted_prompt)
+            messages = [
+                ("human", formatted_prompt),
+            ]
+            return self.llm.invoke(messages).content
         else:
             return self.llm(formatted_prompt)

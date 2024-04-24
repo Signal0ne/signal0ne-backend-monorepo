@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
@@ -81,7 +80,6 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 		if len(formattedAnalysisRelevantLogs) < 1 {
 			formattedAnalysisRelevantLogs = formattedAnalysisLogs
 		}
-		fmt.Printf("###-###Relevant logs: %v\n", formattedAnalysisRelevantLogs)
 
 		qOpts := options.Find()
 		qOpts.Projection = bson.M{"logs": 1}
