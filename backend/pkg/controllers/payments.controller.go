@@ -71,6 +71,9 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
 		}),
+		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+			TrialPeriodDays: stripe.Int64(30),
+		},
 		SuccessURL: stripe.String(fmt.Sprintf("%s?session_id={CHECKOUT_SESSION_ID}", requestData.SuccessUrl)),
 	}
 	if stripeCustomer != nil {
