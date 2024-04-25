@@ -15,7 +15,7 @@ class TitleAgent:
         if tier == 2:
             self.llm = ChatOpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
-                name=endpoint,
+                model=endpoint,
                 temperature=0.4,
                 max_tokens=512,
                 frequency_penalty=1.1
