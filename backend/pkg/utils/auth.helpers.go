@@ -249,6 +249,7 @@ func GetTokenExpirationDateInUnixFormat(tokenString string) int64 {
 }
 
 func VerifyRatingAbility(ctx *gin.Context, user models.User, issuesCollection *mongo.Collection, usersCollection *mongo.Collection) {
+	const AnalysisNoThreshold = 6
 	if !user.CanRateApplication && user.Metrics.OverallScore == 0 {
 		filter := bson.M{"userId": user.UserId}
 		count, err := issuesCollection.CountDocuments(ctx, filter)
@@ -256,7 +257,7 @@ func VerifyRatingAbility(ctx *gin.Context, user models.User, issuesCollection *m
 			return
 		}
 
-		if count >= 10 {
+		if count >= AnalysisNoThreshold {
 			usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId}, bson.M{"$set": bson.M{"canRateApplication": true}})
 		}
 	}
