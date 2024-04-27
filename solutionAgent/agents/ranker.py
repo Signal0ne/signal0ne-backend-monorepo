@@ -3,7 +3,7 @@ import os
 import json
 import re
 from typing import List
-from langchain_community.llms import HuggingFaceEndpoint
+from langchain_openai import ChatOpenAI
 from langchain_openai.llms import OpenAI
 from dotenv import load_dotenv
 
@@ -12,27 +12,16 @@ class RankAgent:
     """Class for the chat agent."""
     def __init__(self, endpoint,tier):
         load_dotenv()
+        self.tier = tier
         if tier == 2:
-            self.llm = OpenAI(
+            self.llm = ChatOpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
-                name=endpoint,
+                model=endpoint,
                 temperature=0.4,
                 max_tokens=100,
                 frequency_penalty=1.1
             )
-        else:
-            self.llm = HuggingFaceEndpoint(
-                endpoint_url=endpoint,
-                task="text-generation",
-                max_new_tokens=100,
-                top_k=30,
-                temperature=0.3,
-                repetition_penalty=1.1,
-            )
-        
-    def rank(self, outputs, logs):
-        """Generate questions from the logs."""
-        prompt = f"""System: You are a helpful assistant that helps ranking the top outputs of websearch based on how relevant
+            self.prompt = """System: You are a helpful assistant that helps ranking the top outputs of websearch based on how relevant
         they are to solving the error recieved in logs. You may use snippet or summary do do your ranking.
         You only give ranking of the indexes of the websearch results.
         Here are user logs: {logs}\n
@@ -41,11 +30,32 @@ class RankAgent:
         Output format is {{"ranks":[1,2,4,.....]}}.\n
         Do not give any alternate answers or any other information except json.
         Output Json:"""
+        else:
+            self.llm = OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                name=endpoint,
+                temperature=0.4,
+                max_tokens=100,
+                frequency_penalty=1.1
+            )
+            self.prompt = """System: You are a helpful assistant that helps ranking the top outputs of websearch based on how relevant
+        they are to solving the error recieved in logs. You may use snippet or summary do do your ranking.
+        You only give ranking of the indexes of the websearch results.
+        Here are user logs: {logs}\n
+        Here are the websearch results: {outputs}\n
+        Only return the index of the most relevant outputs. Use json output format specified below.\n
+        Output format is {{"ranks":[1,2,4,.....]}}.\n
+        Do not give any alternate answers or any other information except json.
+        Output Json:"""
+        
+    def rank(self, outputs, logs):
+        """Generate questions from the logs."""
+        formatted_prompt = self.prompt.format(logs=logs, outputs=outputs)
         i=0
         while i<3:
             try:
                 i+=1
-                result = self.llm(prompt)
+                result = self.__execute(formatted_prompt)
                 match = re.search(r'{(.*?)}', result)
                 if match:
                     extracted_string = match.group(1)
@@ -66,3 +76,12 @@ class RankAgent:
                 print(f"Error in decoding json: {e}")
                 continue
         return []
+    
+    def __execute(self, formatted_prompt: str):
+        if self.tier == 2:
+            messages = [
+                ("human", formatted_prompt),
+            ]
+            return self.llm.invoke(messages).content
+        else:
+            return self.llm(formatted_prompt)
