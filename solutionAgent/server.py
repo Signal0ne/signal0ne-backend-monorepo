@@ -36,6 +36,9 @@ async def run_chat_agent(data: LogData):
             result = chat_agent.run(data.logs)
             return result
         except Exception as e:
+            if retries > 8:
+                print(f"Unable to process the logs, error: {e}")
+                return
             print(f"Unable to process the logs, error: {e} ... retrying")
         
 @app.post("/generate_code_snippet")
