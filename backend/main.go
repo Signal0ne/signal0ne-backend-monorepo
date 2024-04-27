@@ -98,6 +98,7 @@ func main() {
 	userAuthController := controllers.NewUserAuthController(
 		usersCollectionClient,
 		emailClientData,
+		issuesCollectionClient,
 	)
 
 	userController := controllers.NewUserController(

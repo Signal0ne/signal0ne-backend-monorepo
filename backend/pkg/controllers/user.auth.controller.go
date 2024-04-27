@@ -19,15 +19,17 @@ import (
 )
 
 type UserAuthController struct {
-	usersCollection *mongo.Collection
-	emailClientData EmailClientConfig
+	emailClientData  EmailClientConfig
+	issuesCollection *mongo.Collection
+	usersCollection  *mongo.Collection
 }
 
 func NewUserAuthController(usersCollection *mongo.Collection,
-	emailClientData EmailClientConfig) *UserAuthController {
+	emailClientData EmailClientConfig, issuesCollection *mongo.Collection) *UserAuthController {
 	return &UserAuthController{
-		usersCollection: usersCollection,
-		emailClientData: emailClientData,
+		emailClientData:  emailClientData,
+		issuesCollection: issuesCollection,
+		usersCollection:  usersCollection,
 	}
 }
 
@@ -48,11 +50,6 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 	}
 
 	err = utils.GetUser(ctx, c.usersCollection, bson.M{"userId": strconv.Itoa(userData.Id)}, &user)
-
-	if user.IsPro {
-		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
-	}
-
 	if err != nil && err.Error() != mongo.ErrNoDocuments.Error() {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -60,15 +57,16 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 
 	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
 		user = models.User{
-			UserId:           strconv.Itoa(userData.Id),
-			UserName:         userData.Login,
-			Email:            userData.Email,
-			IsPro:            false,
-			AgentBearerToken: "",
-			Counter:          0,
-			Type:             "github",
+			UserId:             strconv.Itoa(userData.Id),
+			UserName:           userData.Login,
+			Email:              userData.Email,
+			IsPro:              false,
+			AgentBearerToken:   "",
+			Counter:            0,
+			Type:               "github",
+			CanRateApplication: false,
 			Metrics: models.UserMetrics{
-				OverallScore:           -1,
+				OverallScore:           0,
 				ProButtonClicksCount:   0,
 				ProCheckoutClicksCount: 0,
 			},
@@ -79,6 +77,10 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+	}
+
+	if user.IsPro {
+		utils.VerifyProTierSubscription(ctx, user, c.usersCollection)
 	}
 
 	if user.Email != userData.Email {
@@ -94,6 +96,16 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 			return
 		}
 	}
+
+	if user.Metrics == (models.UserMetrics{}) {
+		c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId}, bson.M{"$set": bson.M{"metrics": models.UserMetrics{
+			OverallScore:           0,
+			ProButtonClicksCount:   0,
+			ProCheckoutClicksCount: 0,
+		}}})
+	}
+
+	utils.VerifyRatingAbility(ctx, user, c.issuesCollection, c.usersCollection)
 
 	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
@@ -137,15 +149,16 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 	}
 	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
 		user = models.User{
-			UserId:           claims.Subject,
-			UserName:         claims.Email,
-			Email:            claims.Email,
-			IsPro:            false,
-			AgentBearerToken: "",
-			Counter:          0,
-			Type:             "google",
+			UserId:             claims.Subject,
+			UserName:           claims.Email,
+			Email:              claims.Email,
+			IsPro:              false,
+			AgentBearerToken:   "",
+			Counter:            0,
+			Type:               "google",
+			CanRateApplication: false,
 			Metrics: models.UserMetrics{
-				OverallScore:           -1,
+				OverallScore:           0,
 				ProButtonClicksCount:   0,
 				ProCheckoutClicksCount: 0,
 			},
@@ -176,6 +189,16 @@ func (c *UserAuthController) LoginWithGoogleHandler(ctx *gin.Context) {
 			return
 		}
 	}
+
+	if user.Metrics == (models.UserMetrics{}) {
+		c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId}, bson.M{"$set": bson.M{"metrics": models.UserMetrics{
+			OverallScore:           0,
+			ProButtonClicksCount:   0,
+			ProCheckoutClicksCount: 0,
+		}}})
+	}
+
+	utils.VerifyRatingAbility(ctx, user, c.issuesCollection, c.usersCollection)
 
 	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
@@ -230,6 +253,16 @@ func (c *UserAuthController) LoginHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"descriptionKey": "ACCOUNT_NOT_ACTIVE"})
 		return
 	}
+
+	if user.Metrics == (models.UserMetrics{}) {
+		c.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId}, bson.M{"$set": bson.M{"metrics": models.UserMetrics{
+			OverallScore:           0,
+			ProButtonClicksCount:   0,
+			ProCheckoutClicksCount: 0,
+		}}})
+	}
+
+	utils.VerifyRatingAbility(ctx, user, c.issuesCollection, c.usersCollection)
 
 	accessTokenString, err := utils.CreateToken(user, "access")
 	if err != nil {
@@ -339,8 +372,9 @@ func (c *UserAuthController) RegisterHandler(ctx *gin.Context) {
 		Type:                  "signalone",
 		EmailConfirmed:        false,
 		EmailConfirmationCode: confirmationToken,
+		CanRateApplication:    false,
 		Metrics: models.UserMetrics{
-			OverallScore:           -1,
+			OverallScore:           0,
 			ProButtonClicksCount:   0,
 			ProCheckoutClicksCount: 0,
 		},
