@@ -14,6 +14,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const ACCESS_TOKEN_EXPIRATION_TIME = time.Minute * 10
@@ -46,11 +48,12 @@ func CreateToken(user models.User, tokenType string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"exp":      time.Now().Add(expTime).Unix(),
-			"id":       user.UserId,
-			"userName": user.UserName,
-			"email":    user.Email,
-			"isPro":    user.IsPro,
+			"exp":                time.Now().Add(expTime).Unix(),
+			"id":                 user.UserId,
+			"userName":           user.UserName,
+			"email":              user.Email,
+			"isPro":              user.IsPro,
+			"canRateApplication": user.CanRateApplication,
 		})
 
 	tokenString, err := token.SignedString(SECRET_KEY)
@@ -243,4 +246,19 @@ func GetTokenExpirationDateInUnixFormat(tokenString string) int64 {
 	}
 
 	return expirationTimestamp.Unix()
+}
+
+func VerifyRatingAbility(ctx *gin.Context, user models.User, issuesCollection *mongo.Collection, usersCollection *mongo.Collection) {
+	const AnalysisNoThreshold = 6
+	if !user.CanRateApplication && user.Metrics.OverallScore == 0 {
+		filter := bson.M{"userId": user.UserId}
+		count, err := issuesCollection.CountDocuments(ctx, filter)
+		if err != nil {
+			return
+		}
+
+		if count >= AnalysisNoThreshold {
+			usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId}, bson.M{"$set": bson.M{"canRateApplication": true}})
+		}
+	}
 }

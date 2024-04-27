@@ -58,6 +58,7 @@ func (c *UserController) MetricsOverallScoreHandler(ctx *gin.Context) {
 
 	filter := bson.M{"userId": userId}
 	update := bson.M{"$set": bson.M{
+		"canRateApplication":   false,
 		"metrics.overallScore": *overallScoreRequest.OverallScore,
 	}}
 
