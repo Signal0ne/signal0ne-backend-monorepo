@@ -194,6 +194,7 @@ func (c *IntegrationController) DeleteIssues(ctx *gin.Context) {
 func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	var issue models.Issue
 	var codeContext models.CodeContextRequest
+	var user models.User
 	id := ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
@@ -202,6 +203,11 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	}
 
 	if err := c.issuesCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&issue); err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
+	}
+
+	if err := c.usersCollection.FindOne(ctx, bson.M{"userId": issue.UserId}).Decode(&user); err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
 		return
 	}
@@ -217,6 +223,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		Logs:               strings.Join(formattedAnalysisRelevantLogs, "\n"),
 		PredictedSolutions: issue.PredictedSolutionsSummary,
 		LanguageId:         codeContext.Lang,
+		IsUserPro:          user.IsPro,
 	}
 
 	jsonData, _ := json.Marshal(codeSnippetRequest)
