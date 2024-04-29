@@ -51,7 +51,7 @@ class GraphGen:
             "logsummary":header['logsummary'],
             "predictedSolutions":final_output, 
             "sources":urls,
-            "culprit":culprit
+            "culprit":culprit['filename']
         }
         return output
     

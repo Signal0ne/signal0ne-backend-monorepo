@@ -133,6 +133,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 		jsonData, _ := json.Marshal(data)
 		analysisResponse, err = utils.CallPredictionAgentService(jsonData)
 		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 

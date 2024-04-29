@@ -14,7 +14,7 @@ class CodeGen:
             api_key=os.getenv("OPENAI_API_KEY"),
             model=endpoint,
             temperature=0.4,
-            max_tokens=512,
+            max_tokens=1024,
             frequency_penalty=1.1,
             model_kwargs={"response_format": {"type": "json_object"}}
         )
@@ -29,7 +29,7 @@ class CodeGen:
         Here is the broken code: {current_code}\n
         Here is additional context on the issue and proposed solutions by other engineer: {predicted_solutions}\n
         Your output format is {{"code":"your code snippet"}}. Json:"""
-        result = self.llm(prompt)
+        result = self.__execute(prompt)
         result = parse_json(result)
         result_object = json.loads(result)
         result = self.__base_reflection(result_object["code"], languageId)
@@ -44,6 +44,12 @@ class CodeGen:
         Your return type is json newline must be \\n.
         Here is the code to be reviewed: {initial_result}\n
         Your output format is {{"code":"your code snippet with your changes"}}. Json:"""
-        result = self.llm(prompt)
+        result = self.__execute(prompt)
         result = parse_json(result)
         return result
+    
+    def __execute(self, formatted_prompt: str):
+        messages = [
+                ("human", formatted_prompt),
+        ]
+        return self.llm.invoke(messages).content
