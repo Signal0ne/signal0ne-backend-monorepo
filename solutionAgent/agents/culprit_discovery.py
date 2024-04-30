@@ -30,7 +30,7 @@ class CulpritDiscovery:
                 frequency_penalty=1.1
             )
             self.prompt = """You are a helpful assistant that helps find a file or function with a culrpit from software error stacktarce.
-        You return a json with most probable file name or function name you can find in error message containing culprit.
+        You return a json with most probable file name or function name you can find in error message containing culprit. If there is none you must return null.
         Here are the logs: {logs}\n
         Output format is {{"filename": "file or function name containing code culprit"}}. Json:"""
             
