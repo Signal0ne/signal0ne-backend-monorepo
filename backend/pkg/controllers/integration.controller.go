@@ -19,15 +19,18 @@ type IntegrationController struct {
 	issuesCollection        *mongo.Collection
 	usersCollection         *mongo.Collection
 	analysisStoreCollection *mongo.Collection
+	configCollection        *mongo.Collection
 }
 
 func NewIntegrationController(issuesCollection *mongo.Collection,
 	usersCollection *mongo.Collection,
-	analysisStoreCollection *mongo.Collection) *IntegrationController {
+	analysisStoreCollection *mongo.Collection,
+	configCollection *mongo.Collection) *IntegrationController {
 	return &IntegrationController{
 		issuesCollection:        issuesCollection,
 		usersCollection:         usersCollection,
 		analysisStoreCollection: analysisStoreCollection,
+		configCollection:        configCollection,
 	}
 }
 
@@ -197,7 +200,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -225,9 +228,38 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Success",
 		"newCode": analysisResponse.Code,
 	})
+}
 
+func (c *IntegrationController) GetExcludedPathsDictionary(ctx *gin.Context) {
+	var excludedPathsFilter models.ExcludedPathsFilter
+
+	err := c.configCollection.FindOne(ctx, bson.M{"configName": "excludedPaths"}).Decode(&excludedPathsFilter)
+	if err != nil && err != mongo.ErrNoDocuments {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	} else if err == mongo.ErrNoDocuments {
+		ctx.JSON(http.StatusOK, []string{})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, excludedPathsFilter.ExcludedPaths)
+}
+
+func (c *IntegrationController) GetAdvancedFilters(ctx *gin.Context) {
+	var advancedFilters []models.AdvancedFilter
+
+	err := c.configCollection.FindOne(ctx, bson.M{"configName": "advancedFilters"}).Decode(&advancedFilters)
+	if err != nil && err != mongo.ErrNoDocuments {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	} else if err == mongo.ErrNoDocuments {
+		ctx.JSON(http.StatusOK, []models.AdvancedFilter{})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, advancedFilters)
 }
