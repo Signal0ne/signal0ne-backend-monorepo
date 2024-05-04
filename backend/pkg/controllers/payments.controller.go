@@ -72,7 +72,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 			"card",
 		}),
 		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
-			// TrialPeriodDays: stripe.Int64(30),
+			TrialPeriodDays: stripe.Int64(30),
 		},
 		SuccessURL: stripe.String(fmt.Sprintf("%s?session_id={CHECKOUT_SESSION_ID}", requestData.SuccessUrl)),
 	}
