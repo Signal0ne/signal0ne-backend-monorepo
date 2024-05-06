@@ -57,8 +57,7 @@ class GoogleCustomSearch:
         results = []
         global_index = 1
         for query in queries['queries']:
-            query = query['question'] + query['context']
-            print(f"Searching for: {query}")
+            query = query['question']
             data = self.search(query)
             try:
                 if 'items' not in data:
