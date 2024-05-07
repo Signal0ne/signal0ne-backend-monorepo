@@ -43,12 +43,10 @@ class AnswerGenerator:
     def generate_answer(self, *args, **kwargs):
         """Generate answer from the logs and context."""
         logs = kwargs.get("logs", "")
-        print("Filtered logs: ", logs)
         context = args[0] if args else {}
         urls = list(set([item['url'] for item in context if 'url' in item]))
         formatted_prompt = self.prompt.format(logs=logs, context=str(context))
         solution = self.__execute(formatted_prompt)
-        # solution = self.__evaluate(solution, logs)
         return solution, urls
     
     def __evaluate(self, solution: str, logs: str):
