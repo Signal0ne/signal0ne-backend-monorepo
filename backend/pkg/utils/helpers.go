@@ -110,7 +110,7 @@ func FilterForRelevantLogs(logs []string) []string {
 		freeze|hang|illegal|invalid|missing|panic|refused|rejected|stacktrace|
 		timeout|traceback|unauthorized|uncaught|undefined|unhandled|unsupported)`
 	issueClassOneregex := `(?i)(deprecated|deprecating|warn|warning)`
-	issueClassTwoRegex := `(?i)(info|information|notice|success|ok)`
+	issueClassTwoRegex := `(?i)(info|information|notice|ok|success)`
 
 	compiledClassZeroRegex := regexp.MustCompile(issueClassZeroRegex)
 	compiledClassOneRegex := regexp.MustCompile(issueClassOneregex)
