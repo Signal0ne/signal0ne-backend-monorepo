@@ -198,6 +198,39 @@ func (c *UserIssuesController) GetIssue(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, issue)
 }
 
+func (c *UserIssuesController) MetricsCopiedSourcesLinksHandler(ctx *gin.Context) {
+	var issue models.Issue
+
+	userId, err := utils.GetUserIdFromToken(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	id := ctx.Param("id")
+
+	issueResult := c.issuesCollection.FindOne(ctx, bson.M{"_id": id, "userId": userId})
+
+	err = issueResult.Decode(&issue)
+	if err != nil && err.Error() == mongo.ErrNoDocuments.Error() {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Issue not found"})
+		return
+	}
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = c.issuesCollection.UpdateOne(ctx, bson.M{"_id": id, "userId": userId}, bson.M{"$inc": bson.M{"copiedSourcesLinksCount": 1}})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Success"})
+}
+
 func (c *UserIssuesController) RateIssue(ctx *gin.Context) {
 	var issue models.Issue
 	var issueRateReq models.IssueRateRequest
