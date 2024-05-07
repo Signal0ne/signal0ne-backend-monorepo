@@ -31,5 +31,4 @@ class CodeGen:
         result = self.llm(prompt)
         result = parse_json(result)
         json.dumps(result)
-        print(result)
         return json.loads(result)
