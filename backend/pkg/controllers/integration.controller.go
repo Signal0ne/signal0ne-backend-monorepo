@@ -158,7 +158,6 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 				"issuePredictedSolutionsSources": analysisResponse.Sources,
 				"relevantLogs":                   analysisResponse.RelevantLogs,
 				"logSummary":                     analysisResponse.LogSummary,
-				"codeBlockCulprit":               analysisResponse.Culprit,
 			},
 			})
 		if err != nil {
@@ -217,15 +216,9 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
-	formattedAnalysisLogs := issue.Logs
-	formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
-	if formattedAnalysisRelevantLogs == nil {
-		formattedAnalysisRelevantLogs = formattedAnalysisLogs
-	}
-
 	codeSnippetRequest := models.CodeSnippetRequest{
 		CurrentCodeSnippet: codeContext.Code,
-		Logs:               strings.Join(formattedAnalysisRelevantLogs, "\n"),
+		Logs:               issue.RelevantLogs,
 		PredictedSolutions: issue.PredictedSolutionsSummary,
 		LanguageId:         codeContext.Lang,
 		IsUserPro:          user.IsPro,
