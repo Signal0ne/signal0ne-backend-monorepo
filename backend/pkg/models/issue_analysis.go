@@ -5,7 +5,7 @@ type IssueAnalysis struct {
 	LogSummary         string   `json:"logsummary"`
 	PredictedSolutions string   `json:"predictedSolutions"`
 	Sources            []string `json:"sources"`
-	Culprit            string   `json:"culprit"`
+	RelevantLogs       string   `json:"relevantLogs"`
 }
 
 type IssueAnalysisReportRequest struct {

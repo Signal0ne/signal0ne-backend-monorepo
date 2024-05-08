@@ -59,7 +59,6 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.PUT("/issues/:id/resolve", mr.userIssuesController.ResolveIssue)
 		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
 		userRouterGroup.POST("/issues/report", mr.userIssuesController.ReportIssueAnalysis)
-		userRouterGroup.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
 		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
 		userRouterGroup.GET("/manage-pro", mr.paymentsController.StripeCreateBillingPortalHandler)
 		userRouterGroup.GET("/settings", func(c *gin.Context) {})
@@ -71,6 +70,11 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 	{
 		agentRouterGroup.DELETE("/issues/:containerId", mr.integrationController.DeleteIssues)
 		agentRouterGroup.PUT("/issues/analysis", mr.integrationController.LogAnalysisTask)
+	}
+
+	integrationRouterGroup := rg.Group("/integration", middlewares.CheckAuthorization)
+	{
+		integrationRouterGroup.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
 	}
 
 	metricsRouterGroup := rg.Group("/metrics", middlewares.CheckAuthorization)

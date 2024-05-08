@@ -22,9 +22,9 @@ class QueryAgent:
             )
             self.prompt = """You are a helpful assistant that helps generate 3 highly descriptive relevant queries from a set of error logs for google search.
         Take a note of the module and library causing error or any component that could help in searching the web for more information. You return a json with the queries. Do not forget to add relevant log
-        statements and to each of your queries. Your return type is json. You only output in the format specified below.
+        statements to each of your queries. Your return type is json. You only output in the format specified below.
         Here are the logs: {logs}\n
-        Output format is {{"queries": [{{"question":"your question","context":"the context for the question"}}]}}. Json:"""
+        Output format is {{"queries": [{{"question":"your question","context":"relevant log statements"}}]}}. Json:"""
         else:
             self.llm = OpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
@@ -35,9 +35,9 @@ class QueryAgent:
             )
             self.prompt = """You are a helpful assistant that helps generate 3 highly descriptive relevant queries from a set of error logs for google search.
         Take a note of the module and library causing error or any component that could help in searching the web for more information. You return a json with the queries. Do not forget to add relevant log
-        statements and to each of your queries. Your return type is json. You only output in the format specified below.
+        statements to each of your queries. Your return type is json. You only output in the format specified below.
         Here are the logs: {logs}\n
-        Output format is {{"queries": [{{"question":"your question","context":"the context for the question"}}]}}. Json:"""
+        Output format is {{"queries": [{{"question":"your question","context":"relevant log statements"}}]}}. Json:"""
         
     def gen_ques(self, logs):
         """Generate questions from the logs."""

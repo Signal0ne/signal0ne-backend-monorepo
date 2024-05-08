@@ -35,9 +35,9 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 
 	cfg := config.GetInstance()
 
-	stripeProductId := cfg.StripeProductIdProd
+	stripePriceId := cfg.StripePriceIdProd
 	if cfg.Mode == "local" {
-		stripeProductId = cfg.StripeProductIdTest
+		stripePriceId = cfg.StripePriceIdTest
 	}
 
 	userId, err := utils.GetUserIdFromToken(ctx)
@@ -63,7 +63,7 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 		CancelURL: stripe.String(requestData.CancelUrl),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
-				Price:    stripe.String(stripeProductId),
+				Price:    stripe.String(stripePriceId),
 				Quantity: stripe.Int64(1),
 			},
 		},

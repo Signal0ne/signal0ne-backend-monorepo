@@ -120,6 +120,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			TimeStamp:                 time.Now(),
 			IsResolved:                false,
 			Logs:                      formattedAnalysisLogs,
+			RelevantLogs:              "",
 			LogSummary:                "",
 			PredictedSolutionsSummary: "",
 			PredictedSolutionsSources: []string{},
@@ -155,6 +156,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 				"timestamp":                      time.Now(),
 				"predictedSolutionsSummary":      analysisResponse.PredictedSolutions,
 				"issuePredictedSolutionsSources": analysisResponse.Sources,
+				"relevantLogs":                   analysisResponse.RelevantLogs,
 				"logSummary":                     analysisResponse.LogSummary,
 				"codeBlockCulprit":               analysisResponse.Culprit,
 			},
@@ -201,7 +203,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -235,9 +237,8 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Success",
 		"newCode": analysisResponse.Code,
 	})
-
 }

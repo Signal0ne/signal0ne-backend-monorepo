@@ -35,7 +35,6 @@ class CodeGen:
             result = parse_json(result)
             result_object = json.loads(result)
             result = self.__base_reflection(result_object["code"], languageId)
-            return json.loads(result)
         else:
             return {"code": ""}
     
@@ -50,7 +49,7 @@ class CodeGen:
         Your output format is {{"code":"your code snippet with your changes"}}. Json:"""
         result = self.__execute(prompt)
         result = parse_json(result)
-        return result
+        return json.loads(result)
     
     def __base_code_macthing_issue_reflection(self, current_code, logs, languageId):
         """Reflect if the code matches the issue context as Software Engineer persona"""
@@ -63,7 +62,7 @@ class CodeGen:
         Your output format is {{"relevant":"true or false value"}}. Json:"""
         result = self.__execute(prompt)
         result = parse_json(result)
-        return result
+        return json.loads(result)
     
     def __execute(self, formatted_prompt: str):
         messages = [
