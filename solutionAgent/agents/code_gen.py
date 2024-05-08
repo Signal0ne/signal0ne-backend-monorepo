@@ -23,7 +23,7 @@ class CodeGen:
         """Generate code snippets from the logs."""
 
         initial_reflection = self.__base_code_macthing_issue_reflection(current_code, logs, languageId)
-        if initial_reflection["relevant"] == "true":
+        if bool(initial_reflection["relevant"]):
             prompt = f"""You are a helpful assistant that helps to fix code written in {languageId}. 
             You return a json with the code snippet. You only return the code no explanation.
             Your return type is json newline must be \\n.
@@ -35,6 +35,7 @@ class CodeGen:
             result = parse_json(result)
             result_object = json.loads(result)
             result = self.__base_reflection(result_object["code"], languageId)
+            return result
         else:
             return {"code": ""}
     
@@ -55,11 +56,12 @@ class CodeGen:
         """Reflect if the code matches the issue context as Software Engineer persona"""
         
         prompt = f"""Your are helpful assistant who helps estimate if the code can be fixed based on provided logs 
-        You return json with true or false. True if the code can be fixed with the issue context and false otherwise.
+        You return json with true or false. True if the code could produce the follwing log output and false otherwise.
+        You will be punished for false positives.
         Code: {current_code}\n
         Language: {languageId}\n
         Logs: {logs}\n
-        Your output format is {{"relevant":"true or false value"}}. Json:"""
+        Your output format is {{"relevant":"answer"}}. Json:"""
         result = self.__execute(prompt)
         result = parse_json(result)
         return json.loads(result)
