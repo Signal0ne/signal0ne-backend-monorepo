@@ -47,6 +47,10 @@ class GraphGen:
         ranker_node.add_child(answer_generator_node)  # Connect ranker to answer generator
         final_output, urls = query_generator_node.execute(logs=logs)
         header = gentitle.execute(logs=logs)
-        output = {"title":header['title'] , "Logsummary":header['logsummary'],"predictedSolutions":final_output, "sources":urls}
+        output = {"title":header['title'], 
+                  "Logsummary":header['logsummary'],
+                  "predictedSolutions":final_output, 
+                  "sources":urls,
+                  "relevantLogs":logs}
         return output
     

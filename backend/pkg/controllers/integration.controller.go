@@ -123,7 +123,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			TimeStamp:                 time.Now(),
 			IsResolved:                false,
 			Logs:                      formattedAnalysisLogs,
-			RelevantLogs:              formattedAnalysisRelevantLogs,
+			RelevantLogs:              "",
 			LogSummary:                "",
 			PredictedSolutionsSummary: "",
 			PredictedSolutionsSources: []string{},
@@ -157,6 +157,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 				"timestamp":                      time.Now(),
 				"predictedSolutionsSummary":      analysisResponse.PredictedSolutions,
 				"issuePredictedSolutionsSources": analysisResponse.Sources,
+				"relevantLogs":                   analysisResponse.RelevantLogs,
 				"logSummary":                     analysisResponse.LogSummary,
 			},
 			})
