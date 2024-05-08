@@ -71,7 +71,6 @@ func main() {
 		panic(err)
 	}
 	savedAnalysisCollectionClient := savedAnalysisDbClient.Database(cfg.SavedAnalysisDbName).Collection(cfg.SavedAnalysisCollectionName)
-	configCollectionClient := appDbClient.Database(cfg.ConfigDbName).Collection(cfg.ConfigCollectionName)
 
 	emailClientData := controllers.EmailClientConfig{
 		AuthData:    smtp.PlainAuth("", "contact@signaloneai.com", cfg.EmailPassword, "smtp.hostinger.com"),
@@ -117,7 +116,6 @@ func main() {
 		issuesCollectionClient,
 		usersCollectionClient,
 		savedAnalysisCollectionClient,
-		configCollectionClient,
 	)
 
 	integrationAuthController := controllers.NewIntegrationAuthController(
