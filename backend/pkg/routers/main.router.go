@@ -58,6 +58,7 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 		userRouterGroup.PUT("/issues/:id/regenerate", mr.userIssuesController.RegenerateSolution)
 		userRouterGroup.PUT("/issues/:id/resolve", mr.userIssuesController.ResolveIssue)
 		userRouterGroup.PUT("/issues/:id/score", mr.userIssuesController.RateIssue)
+		userRouterGroup.GET("/issues/:id/metrics/copied-sources-links", mr.userIssuesController.MetricsCopiedSourcesLinksHandler)
 		userRouterGroup.POST("/issues/report", mr.userIssuesController.ReportIssueAnalysis)
 		userRouterGroup.GET("/last-activity", mr.userController.LastActivityHandler)
 		userRouterGroup.GET("/manage-pro", mr.paymentsController.StripeCreateBillingPortalHandler)
