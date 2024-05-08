@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from typing import List, Tuple
 from node.node import Node
 from agents.answer import AnswerGenerator as AnswerGenerator
+from agents.culprit_discovery import CulpritDiscovery
 from websearch.search import GoogleCustomSearch
 from agents.ranker import RankAgent as Ranker
 from agents.query_gen import QueryAgent as QueryGen
@@ -27,6 +28,7 @@ class GraphGen:
         self.search = GoogleCustomSearch()
         self.ranker = Ranker(self.endpoint_url, self.tier)
         self.answer_generator = AnswerGenerator(self.endpoint_url, self.tier)
+        self.culprit_discovery = CulpritDiscovery(self.endpoint_url, self.tier)
 
 
     def run(self, logs: str) -> Tuple[str, List[str]]:
@@ -40,6 +42,7 @@ class GraphGen:
         search_node = Node(self.search.run_search, "Search")
         ranker_node = Node(self.ranker.rank, "Ranker", include_logs=True)
         answer_generator_node = Node(self.answer_generator.generate_answer, "Answer Generator", include_logs=True)
+        culprit_discovery_node = Node(self.culprit_discovery.discover_culprit, "Culprit Discovery", include_logs=True)
 
         # Connect nodes
         query_generator_node.add_child(search_node)  # Connect query generator to search

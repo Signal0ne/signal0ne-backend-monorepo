@@ -5,6 +5,7 @@ type CodeSnippetRequest struct {
 	Logs               string `json:"logs"`
 	PredictedSolutions string `json:"predictedSolutions"`
 	LanguageId         string `json:"languageId"`
+	IsUserPro          bool   `json:"isUserPro"`
 }
 
 type CodeSnippetResponse struct {
