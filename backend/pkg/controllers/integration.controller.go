@@ -235,33 +235,3 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		"newCode": analysisResponse.Code,
 	})
 }
-
-func (c *IntegrationController) GetExcludedPathsDictionary(ctx *gin.Context) {
-	var excludedPathsFilter models.ExcludedPathsFilter
-
-	err := c.configCollection.FindOne(ctx, bson.M{"configName": "excludedPaths"}).Decode(&excludedPathsFilter)
-	if err != nil && err != mongo.ErrNoDocuments {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	} else if err == mongo.ErrNoDocuments {
-		ctx.JSON(http.StatusOK, []string{})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, excludedPathsFilter.ExcludedPaths)
-}
-
-func (c *IntegrationController) GetAdvancedFilters(ctx *gin.Context) {
-	var advancedFilters []models.AdvancedFilter
-
-	err := c.configCollection.FindOne(ctx, bson.M{"configName": "advancedFilters"}).Decode(&advancedFilters)
-	if err != nil && err != mongo.ErrNoDocuments {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	} else if err == mongo.ErrNoDocuments {
-		ctx.JSON(http.StatusOK, []models.AdvancedFilter{})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, advancedFilters)
-}

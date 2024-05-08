@@ -74,8 +74,6 @@ func (mr *MainRouter) RegisterRoutes(rg *gin.RouterGroup) {
 
 	integrationRouterGroup := rg.Group("/integration", middlewares.CheckAuthorization)
 	{
-		integrationRouterGroup.GET("/configs/advanced-filters", mr.integrationController.GetAdvancedFilters)
-		integrationRouterGroup.GET("/configs/excluded-paths", mr.integrationController.GetExcludedPathsDictionary)
 		integrationRouterGroup.POST("/issues/:id/add-code-as-context", mr.integrationController.AddCodeAsContext)
 	}
 
