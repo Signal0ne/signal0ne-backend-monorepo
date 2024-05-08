@@ -55,10 +55,6 @@ type Config struct {
 	SavedAnalysisDbUrl          string `mapstructure:"SAVED_ANALYSIS_DB_URL"`
 	SavedAnalysisDbName         string `mapstructure:"SAVED_ANALYSIS_DB_NAME"`
 	SavedAnalysisCollectionName string `mapstructure:"SAVED_ANALYSIS_COLLECTION_NAME"`
-
-	//Signal0ne Config Database Details
-	ConfigDbName         string `mapstructure:"CONFIG_DB_NAME"`
-	ConfigCollectionName string `mapstructure:"CONFIG_COLLECTION_NAME"`
 }
 
 var (

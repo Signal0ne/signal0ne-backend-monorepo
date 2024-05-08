@@ -19,18 +19,15 @@ type IntegrationController struct {
 	issuesCollection        *mongo.Collection
 	usersCollection         *mongo.Collection
 	analysisStoreCollection *mongo.Collection
-	configCollection        *mongo.Collection
 }
 
 func NewIntegrationController(issuesCollection *mongo.Collection,
 	usersCollection *mongo.Collection,
-	analysisStoreCollection *mongo.Collection,
-	configCollection *mongo.Collection) *IntegrationController {
+	analysisStoreCollection *mongo.Collection) *IntegrationController {
 	return &IntegrationController{
 		issuesCollection:        issuesCollection,
 		usersCollection:         usersCollection,
 		analysisStoreCollection: analysisStoreCollection,
-		configCollection:        configCollection,
 	}
 }
 
