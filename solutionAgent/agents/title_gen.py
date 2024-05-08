@@ -44,7 +44,6 @@ class TitleAgent:
         formatted_prompt = self.prompt.format(logs=logs)
         result = self.__execute(formatted_prompt)
         result = parse_json(result)
-        print(result)
         return json.loads(result)
 
     def __execute(self, formatted_prompt: str):
