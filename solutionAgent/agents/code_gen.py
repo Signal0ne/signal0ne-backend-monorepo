@@ -56,7 +56,7 @@ class CodeGen:
         """Reflect if the code matches the issue context as Software Engineer persona"""
         
         prompt = f"""Your are helpful assistant who helps estimate if the code can be fixed based on provided logs 
-        You return json with true or false. True if the code could produce the follwing log output and false otherwise.
+        You return json with true or false. True if the code could produce the following log output and false otherwise.
         You will be punished for false positives.
         Code: {current_code}\n
         Language: {languageId}\n
