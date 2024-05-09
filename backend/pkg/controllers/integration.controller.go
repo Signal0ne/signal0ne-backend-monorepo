@@ -124,6 +124,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			LogSummary:                "",
 			PredictedSolutionsSummary: "",
 			PredictedSolutionsSources: []string{},
+			CodeBlockCulprit:          "",
 		})
 
 		data := map[string]any{
@@ -133,6 +134,7 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 		jsonData, _ := json.Marshal(data)
 		analysisResponse, err = utils.CallPredictionAgentService(jsonData)
 		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -196,6 +198,7 @@ func (c *IntegrationController) DeleteIssues(ctx *gin.Context) {
 func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	var issue models.Issue
 	var codeContext models.CodeContextRequest
+	var user models.User
 	id := ctx.Param("id")
 
 	if err := ctx.ShouldBindJSON(&codeContext); err != nil {
@@ -208,17 +211,17 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
-	formattedAnalysisLogs := issue.Logs
-	formattedAnalysisRelevantLogs := utils.FilterForRelevantLogs(formattedAnalysisLogs)
-	if formattedAnalysisRelevantLogs == nil {
-		formattedAnalysisRelevantLogs = formattedAnalysisLogs
+	if err := c.usersCollection.FindOne(ctx, bson.M{"userId": issue.UserId}).Decode(&user); err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+		return
 	}
 
 	codeSnippetRequest := models.CodeSnippetRequest{
 		CurrentCodeSnippet: codeContext.Code,
-		Logs:               strings.Join(formattedAnalysisRelevantLogs, "\n"),
+		Logs:               issue.RelevantLogs,
 		PredictedSolutions: issue.PredictedSolutionsSummary,
 		LanguageId:         codeContext.Lang,
+		IsUserPro:          user.IsPro,
 	}
 
 	jsonData, _ := json.Marshal(codeSnippetRequest)

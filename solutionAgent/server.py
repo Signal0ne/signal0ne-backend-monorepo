@@ -16,6 +16,7 @@ class CodeSnippetGen(BaseModel):
     currentCodeSnippet: str
     predictedSolutions: str
     languageId: str
+    isUserPro: bool
 
 app = FastAPI()
 dotenv.load_dotenv()
@@ -43,8 +44,10 @@ async def run_chat_agent(data: LogData):
         
 @app.post("/generate_code_snippet")
 async def generate_code_snippet(data: CodeSnippetGen):
+    if not data.isUserPro:
+        return ""
     dotenv.load_dotenv()
-    chat_agent = CodeGen(os.getenv('CODE_ENDPOINT_URL'))
+    chat_agent = CodeGen(os.getenv('CODE_TIER1_MODEL_ENDPOINT'))
     result = chat_agent.gen_code(data.logs, data.currentCodeSnippet, data.predictedSolutions, data.languageId)
     return result
         

@@ -1,7 +1,6 @@
 """Module for question generator"""
 import os
 import json
-from langchain_community.llms import HuggingFaceEndpoint
 from langchain_openai.llms import OpenAI
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
