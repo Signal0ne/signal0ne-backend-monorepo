@@ -3,7 +3,6 @@ import os
 import json
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from websearch.search import GoogleCustomSearch
 from utils.utils import parse_json
 
 class CodeGen:
@@ -18,7 +17,6 @@ class CodeGen:
             frequency_penalty=1.1,
             # model_kwargs={"response_format": {"type": "json_object"}}
         )
-        self.search = GoogleCustomSearch()
 
     def gen_code(self, logs, current_code, predicted_solutions, languageId):
         """Generate code snippets from the logs."""
