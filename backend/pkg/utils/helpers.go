@@ -110,23 +110,15 @@ func FilterForRelevantLogs(logs []string) []string {
 		freeze|hang|illegal|invalid|missing|panic|refused|rejected|stacktrace|
 		timeout|traceback|unauthorized|uncaught|undefined|unhandled|unsupported)`
 	issueClassOneregex := `(?i)(deprecated|deprecating|warn|warning)`
-	issueClassTwoRegex := `(?i)(info|information|notice|ok|success)`
 
 	compiledClassZeroRegex := regexp.MustCompile(issueClassZeroRegex)
 	compiledClassOneRegex := regexp.MustCompile(issueClassOneregex)
-	compiledClassTwoRegex := regexp.MustCompile(issueClassTwoRegex)
 
-	errorDiscovered := executeRelevantLogsLoopComponent(logs, compiledClassZeroRegex)
-	if errorDiscovered {
-		relevantLogs = excludeIrrelevantLogs(logs, compiledClassOneRegex)
-		relevantLogs = excludeIrrelevantLogs(relevantLogs, compiledClassTwoRegex)
-		return relevantLogs
-	}
+	globalLoopMatched := false
 
-	warningDiscovered := executeRelevantLogsLoopComponent(logs, compiledClassOneRegex)
-	if warningDiscovered {
-		relevantLogs = excludeIrrelevantLogs(logs, compiledClassTwoRegex)
-		return relevantLogs
+	globalLoopMatched = executeRelevantLogsLoopComponent(logs, &relevantLogs, compiledClassZeroRegex)
+	if !globalLoopMatched {
+		executeRelevantLogsLoopComponent(logs, &relevantLogs, compiledClassOneRegex)
 	}
 
 	return relevantLogs
@@ -197,22 +189,28 @@ func MaskSecrets(data string) string {
 
 	return data
 }
-
-func executeRelevantLogsLoopComponent(logs []string, regEx *regexp.Regexp) bool {
-	for _, log := range logs {
+func executeRelevantLogsLoopComponent(logs []string, relevantLogs *[]string, regEx *regexp.Regexp) bool {
+	var globalLoopMatched = false
+	for logIndex, log := range logs {
+		if len(*relevantLogs) != 0 {
+			for _, relevantLog := range *relevantLogs {
+				if log == relevantLog {
+					continue
+				}
+			}
+		}
 		if matched := regEx.MatchString(log); matched {
-			return true
+			*relevantLogs = append(*relevantLogs, logs[logIndex])
+			globalLoopMatched = true
+			//Add the next and previous log to the relevant logs if stack trace is found
+			//To be improved
+			if logIndex+1 < len(logs) {
+				*relevantLogs = append(*relevantLogs, logs[logIndex+1])
+			}
+			if logIndex-1 >= 0 {
+				*relevantLogs = append(*relevantLogs, logs[logIndex-1])
+			}
 		}
 	}
-	return false
-}
-
-func excludeIrrelevantLogs(logs []string, regEx *regexp.Regexp) []string {
-	var tmpRelevantLogs = make([]string, 0)
-	for _, log := range logs {
-		if matched := regEx.MatchString(log); !matched {
-			tmpRelevantLogs = append(tmpRelevantLogs, log)
-		}
-	}
-	return tmpRelevantLogs
+	return globalLoopMatched
 }
