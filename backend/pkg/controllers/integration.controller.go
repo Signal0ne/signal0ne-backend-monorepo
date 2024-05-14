@@ -230,7 +230,8 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Success",
-		"newCode": analysisResponse.Code,
+		"message":     "Success",
+		"newCode":     analysisResponse.Code,
+		"explanation": analysisResponse.Explanation,
 	})
 }

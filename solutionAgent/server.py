@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from graph import GraphGen
 from agents.code_gen import CodeGen
+from fastapi.responses import JSONResponse
 
 class LogData(BaseModel):
     '''Class for the log data'''
@@ -39,7 +40,7 @@ async def run_chat_agent(data: LogData):
         except Exception as e:
             if retries > 8:
                 print(f"Unable to process the logs, error: {e}")
-                return
+                return JSONResponse(status_code=500, content={"message": "Unable to process the logs"})
             print(f"Unable to process the logs, error: {e} ... retrying")
         
 @app.post("/generate_code_snippet")
@@ -49,5 +50,6 @@ async def generate_code_snippet(data: CodeSnippetGen):
     dotenv.load_dotenv()
     chat_agent = CodeGen(os.getenv('CODE_TIER1_MODEL_ENDPOINT'))
     result = chat_agent.gen_code(data.logs, data.currentCodeSnippet, data.predictedSolutions, data.languageId)
+    print(result)
     return result
         

@@ -36,9 +36,11 @@ class CodeGen:
             result = parse_json(result)
             result_object = json.loads(result)
             result = self.__base_reflection(result_object["code"], languageId, context)
-            return result
+            result["explanation"] = context
+            result = json.dumps(result)
+            return json.loads(result)
         else:
-            return {"code": ""}
+            return {"code": "", "explanation":""}
     
     def __base_reflection(self, initial_result, languageId, context):
         """Reflect on the result as Code Reviewer persona"""
