@@ -45,4 +45,7 @@ class LogFilterer:
             ]
             return self.llm.invoke(messages).content
         else:
-            return self.llm(formatted_prompt)
+            messages = [
+                ("human", formatted_prompt),
+            ]
+            return self.llm.invoke(messages).content
