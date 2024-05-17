@@ -50,6 +50,5 @@ async def generate_code_snippet(data: CodeSnippetGen):
     dotenv.load_dotenv()
     chat_agent = CodeGen(os.getenv('CODE_TIER1_MODEL_ENDPOINT'))
     result = chat_agent.gen_code(data.logs, data.currentCodeSnippet, data.predictedSolutions, data.languageId)
-    print(result)
     return result
         
