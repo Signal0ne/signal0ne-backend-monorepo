@@ -31,9 +31,9 @@ class RankAgent:
         Do not give any alternate answers or any other information except json.
         Output Json:"""
         else:
-            self.llm = OpenAI(
+            self.llm = ChatOpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
-                name=endpoint,
+                model=endpoint,
                 temperature=0.4,
                 max_tokens=100,
                 frequency_penalty=1.1

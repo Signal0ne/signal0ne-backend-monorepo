@@ -26,9 +26,9 @@ class TitleAgent:
                          Output json format is {{\"title\": \"your title\", \"logsummary\": \"your summary\"}}
                          json: """
         else:
-            self.llm = OpenAI(
+            self.llm = ChatOpenAI(
                 api_key=os.getenv("OPENAI_API_KEY"),
-                name=endpoint,
+                model=endpoint,
                 temperature=0.4,
                 max_tokens=512,
                 frequency_penalty=1.1

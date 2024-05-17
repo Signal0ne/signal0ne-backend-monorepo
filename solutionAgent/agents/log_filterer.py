@@ -23,13 +23,13 @@ class LogFilterer:
                             Filter the logs given below to only the most relevant logs that directly indicate issue. Do not include any irrelevant logs.
                             Logs: {logs}"""
         else:
-            self.llm = OpenAI(
-                    api_key=os.getenv("OPENAI_API_KEY"),
-                    name=endpoint,
-                    temperature=0.3,
-                    max_tokens=512,
-                    frequency_penalty=1.3
-                )
+            self.llm = ChatOpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                model=endpoint,
+                temperature=0.3,
+                max_tokens=512,
+                frequency_penalty=1.3
+            )
             self.prompt = """System: You are a helpful software engineer whose job is to filter the relevant logs from logtail to resolve the issue in the logs.
                             Filter the logs given below to only the most relevant logs that directly indicate issue. Do not include any irrelevant logs.
                             Logs: {logs}"""
