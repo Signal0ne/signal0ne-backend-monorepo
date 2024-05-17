@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"signalone/pkg/models"
 	"signalone/pkg/utils"
@@ -360,11 +361,16 @@ func (c *UserIssuesController) RegenerateSolution(ctx *gin.Context) {
 	}
 
 	var formattedAnalysisRelevantLogs = utils.FilterForRelevantLogs(issue.Logs)
-	data := map[string]string{"logs": strings.Join(formattedAnalysisRelevantLogs, "\n")}
+	data := map[string]any{
+		"logs":      strings.Join(formattedAnalysisRelevantLogs, "\n"),
+		"isUserPro": user.IsPro,
+	}
 	jsonData, _ := json.Marshal(data)
 
 	analysisResponse, err = utils.CallPredictionAgentService(jsonData)
+	fmt.Printf("Analysis response: %v\n", analysisResponse)
 	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
