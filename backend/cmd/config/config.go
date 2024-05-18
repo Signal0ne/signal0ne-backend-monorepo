@@ -16,8 +16,10 @@ type Config struct {
 	EmailPassword string `mapstructure:"EMAIL_PASSWORD"`
 
 	//GitHub Data
-	GithubClientId     string `mapstructure:"GITHUB_CLIENT_ID"`
-	GithubClientSecret string `mapstructure:"GITHUB_CLIENT_SECRET"`
+	CustomIDPGithubClientId string `mapstructure:"CUSTOM_IDP_GITHUB_CLIENT_ID"`
+	CustomIDPGithubSecret   string `mapstructure:"CUSTOM_IDP_GITHUB_SECRET"`
+	GithubClientId          string `mapstructure:"GITHUB_CLIENT_ID"`
+	GithubClientSecret      string `mapstructure:"GITHUB_CLIENT_SECRET"`
 
 	//Google Data
 	GoogleClientId     string `mapstructure:"GOOGLE_CLIENT_ID"`

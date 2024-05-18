@@ -64,16 +64,30 @@ func CreateToken(user models.User, tokenType string) (string, error) {
 	return tokenString, nil
 }
 
-func GetGithubData(code string) (models.GithubUserData, error) {
+func GetGithubData(githubCodePayload models.GithubTokenRequest) (models.GithubUserData, error) {
 	var cfg = config.GetInstance()
 	var githubData = models.GithubUserData{}
 	var githubJWTData = models.GithubTokenResponse{}
 	var httpClient = &http.Client{}
+	var client_id string
+	var client_secret string
+
+	switch githubCodePayload.Source {
+	case "docker":
+		client_id = cfg.GithubClientId
+		client_secret = cfg.GithubClientSecret
+	case "customIdp":
+		client_id = cfg.CustomIDPGithubClientId
+		client_secret = cfg.CustomIDPGithubSecret
+	default:
+		client_id = cfg.GithubClientId
+		client_secret = cfg.GithubClientSecret
+	}
 
 	ghJWTReqBody := map[string]string{
-		"client_id":     cfg.GithubClientId,
-		"client_secret": cfg.GithubClientSecret,
-		"code":          code,
+		"client_id":     client_id,
+		"client_secret": client_secret,
+		"code":          githubCodePayload.Code,
 	}
 
 	jsonData, _ := json.Marshal(ghJWTReqBody)
