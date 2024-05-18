@@ -1,7 +1,5 @@
 import json
 from pymongo import MongoClient
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
 from dotenv import dotenv_values
 import time
 from dateutil import parser
