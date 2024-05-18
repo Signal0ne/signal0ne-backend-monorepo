@@ -4,7 +4,7 @@ import json
 from langchain_openai.llms import OpenAI
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
-from utils.utils import parse_json
+from utilities.utils import parse_json
 
 
 class TitleAgent:

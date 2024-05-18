@@ -2,7 +2,8 @@
 and fetch summaries of the search results."""
 import os
 import json
-from newspaper import Config
+from newspaper.configuration import Configuration
+from transformers import pipeline, AutoTokenizer, TFAutoModelForSeq2SeqLM
 import requests
 import dotenv
 from newspaper import Article
@@ -20,6 +21,10 @@ class GoogleCustomSearch:
         self.cse_id = cse_id
         self.base_url = "https://www.googleapis.com/customsearch/v1"
         self.num_results = 3
+        self.tokenizer = AutoTokenizer.from_pretrained('VidhuMathur/bart-log-summarization')
+        self.model = TFAutoModelForSeq2SeqLM.from_pretrained('VidhuMathur/bart-log-summarization')
+        self.model_pipeline = pipeline("summarization", model=self.model, tokenizer=self.tokenizer)
+    
 
     def build_payload(self, query, **kwargs):
         """Build the payload for the Google Custom Search API query."""
@@ -41,17 +46,21 @@ class GoogleCustomSearch:
     def fetch_summary(self, url):
         """Fetch the summary of an article from the given URL."""
         try:
-            config = Config()
-            config.browser_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36'
+            config = Configuration()
+            config.browser_user_agent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) '
+                                         'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                         'Chrome/97.0.4692.99 Safari/537.36')
             article = Article(url, config=config)
             article.download()
             article.parse()
             article.nlp()
-            return article.summary
+            
+            summary = self.model_pipeline(article.text, max_length=500, min_length=200, do_sample=False)
+            return summary[0]['summary_text']
         except Exception as e:
             print(f"Error fetching summary: {e}")
             return ""
-        
+            
     def run_search(self, queries):
         """Run a search query and return the search results with summaries."""
         results = []
@@ -75,3 +84,13 @@ class GoogleCustomSearch:
                 results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
                 global_index += 1
         return json.dumps(results, indent=4)
+    
+if __name__ == "__main__":
+        search = GoogleCustomSearch()
+        queries = {
+            "queries": [
+                {"question": "MySQL Server Failure: Corrupted InnoDB Plugin and Datafile Issues"},
+            ]
+        }
+        results = search.run_search(queries)
+        print(results)

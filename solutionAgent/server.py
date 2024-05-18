@@ -28,12 +28,11 @@ async def run_chat_agent(data: LogData):
     if data.isUserPro:
         chat_agent = GraphGen(os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
     else:
+        print("Running tier 1 model")
         chat_agent = GraphGen(os.getenv('TIER1_MODEL_ENDPOINT'))
     while True:
         try:
-            print(f"Number of retries {retries}")
             retries = retries + 1
-            print(f"Processing agent tier {chat_agent.tier}")
             result = chat_agent.run(data.logs)
             return result
         except Exception as e:
