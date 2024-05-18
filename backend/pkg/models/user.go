@@ -72,7 +72,8 @@ type GithubUserData struct {
 }
 
 type GithubTokenRequest struct {
-	Code string `json:"code"`
+	Code   string `json:"code"`
+	Source string `json:"source"`
 }
 
 type GithubTokenResponse struct {

@@ -43,7 +43,7 @@ func (c *UserAuthController) LoginWithGithubHandler(ctx *gin.Context) {
 		return
 	}
 
-	var userData, err = utils.GetGithubData(requestData.Code)
+	var userData, err = utils.GetGithubData(requestData)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
