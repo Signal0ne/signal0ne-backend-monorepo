@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -41,6 +42,10 @@ func CallPredictionAgentService(jsonData []byte) (analysisResponse models.IssueA
 	client := &http.Client{}
 	resp, err := client.Do(issueAnalysisReq)
 	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("error: %s", resp.Status)
 		return
 	}
 	defer resp.Body.Close()
