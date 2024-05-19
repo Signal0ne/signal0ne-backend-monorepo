@@ -10,13 +10,15 @@ from agents.ranker import RankAgent as Ranker
 from agents.query_gen import QueryAgent as QueryGen
 from agents.title_gen import TitleAgent as TitleGen
 from agents.log_filterer import LogFilterer
+from transformers import pipeline
 
 class GraphGen:
     """Class for the solution agent."""
-    def __init__(self, endpoint_url: str, tier: int = 1):
+    def __init__(self, model_pipeline, endpoint_url: str, tier: int = 1):
         load_dotenv()
         self.endpoint_url = endpoint_url
         self.tier = tier
+        self.model_pipeline = model_pipeline
         self.load_agents()
 
     def load_agents(self):
@@ -24,7 +26,7 @@ class GraphGen:
         self.log_filterer = LogFilterer(self.endpoint_url, self.tier)
         self.title_generator = TitleGen(self.endpoint_url, self.tier)
         self.query_generator = QueryGen(self.endpoint_url, self.tier)
-        self.search = GoogleCustomSearch()
+        self.search = GoogleCustomSearch(self.model_pipeline)
         self.ranker = Ranker(self.endpoint_url, self.tier)
         self.answer_generator = AnswerGenerator(self.endpoint_url, self.tier)
 

@@ -3,7 +3,6 @@ and fetch summaries of the search results."""
 import os
 import json
 from newspaper.configuration import Configuration
-from transformers import pipeline, AutoTokenizer, TFAutoModelForSeq2SeqLM
 import requests
 import dotenv
 from newspaper import Article
@@ -12,7 +11,7 @@ import nltk
 class GoogleCustomSearch:
     """A class to perform Google Custom Search API queries and
     fetch summaries of the search results."""
-    def __init__(self):
+    def __init__(self, model_pipeline):
         nltk.download('punkt')
         dotenv.load_dotenv()
         api_key = os.getenv('GOOGLE_API_KEY')
@@ -21,9 +20,7 @@ class GoogleCustomSearch:
         self.cse_id = cse_id
         self.base_url = "https://www.googleapis.com/customsearch/v1"
         self.num_results = 3
-        self.tokenizer = AutoTokenizer.from_pretrained('VidhuMathur/bart-log-summarization')
-        self.model = TFAutoModelForSeq2SeqLM.from_pretrained('VidhuMathur/bart-log-summarization')
-        self.model_pipeline = pipeline("summarization", model=self.model, tokenizer=self.tokenizer)
+        self.model_pipeline = model_pipeline
     
 
     def build_payload(self, query, **kwargs):

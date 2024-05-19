@@ -47,7 +47,7 @@ class RankAgent:
         Output format is {{"ranks":[1,2,4,.....]}}.\n
         Do not give any alternate answers or any other information except json.
         Output Json:"""
-        
+
     def rank(self, outputs, logs):
         """Generate questions from the logs."""
         formatted_prompt = self.prompt.format(logs=logs, outputs=outputs)
@@ -76,7 +76,7 @@ class RankAgent:
                 print(f"Error in decoding json: {e}")
                 continue
         return []
-    
+
     def __execute(self, formatted_prompt: str):
         if self.tier == 2:
             messages = [

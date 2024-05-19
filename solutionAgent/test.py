@@ -30,10 +30,12 @@ for log in logset:
         "isUserPro": False
     }
     response = None
+    start_time = time.time()
     while response is None:
         print("Sending request")
         response = requests.post(url, json=data)
-
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time}")
     print(response)
     res = {
         "log": log,

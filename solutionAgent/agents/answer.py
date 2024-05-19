@@ -48,7 +48,7 @@ class AnswerGenerator:
         formatted_prompt = self.prompt.format(logs=logs, context=str(context))
         solution = self.__execute(formatted_prompt)
         return solution, urls
-    
+
     def __evaluate(self, solution: str, logs: str):
         eval_prompt = f"""System: You are a helpful software engineer whose job is to evaluate the solution given below.
         Evaluate the solution given below in context of given logs. If there is any mistake in the solution, edit the solution to be correct.
@@ -56,7 +56,7 @@ class AnswerGenerator:
         Solutions: {solution}
         Logs: {logs}"""
         return self.__execute(eval_prompt)
-    
+
     def __execute(self, formatted_prompt: str):
         if self.tier == 2:
             messages = [
@@ -65,4 +65,3 @@ class AnswerGenerator:
             return self.llm.invoke(messages).content
         else:
             return self.llm(formatted_prompt)
-

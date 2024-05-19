@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from graph import GraphGen
 from agents.code_gen import CodeGen
+from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
 class LogData(BaseModel):
     '''Class for the log data'''
@@ -18,18 +19,21 @@ class CodeSnippetGen(BaseModel):
     languageId: str
     isUserPro: bool
 
+tokenizer = AutoTokenizer.from_pretrained('VidhuMathur/bart-log-summarization')
+model = AutoModelForSeq2SeqLM.from_pretrained('facebook/bart-base')  
+model_pipeline = pipeline("summarization", model=model, tokenizer=tokenizer, framework="pt")
+
 app = FastAPI()
 dotenv.load_dotenv()
-
 @app.post("/run_analysis")
 async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
     retries = 0
     if data.isUserPro:
-        chat_agent = GraphGen(os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
+        chat_agent = GraphGen(model_pipeline,os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
     else:
         print("Running tier 1 model")
-        chat_agent = GraphGen(os.getenv('TIER1_MODEL_ENDPOINT'))
+        chat_agent = GraphGen(model_pipeline,os.getenv('TIER1_MODEL_ENDPOINT'))
     while True:
         try:
             retries = retries + 1
