@@ -60,7 +60,8 @@ func (pc *PaymentController) UpgradeProHandler(ctx *gin.Context) {
 	stripeCustomer, _ := utils.HandleStripeCustomer(user.UserCustomerId)
 
 	checkoutSessionParams := &stripe.CheckoutSessionParams{
-		CancelURL: stripe.String(requestData.CancelUrl),
+		CancelURL:               stripe.String(requestData.CancelUrl),
+		PaymentMethodCollection: stripe.String("if_required"),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				Price:    stripe.String(stripePriceId),
