@@ -48,7 +48,7 @@ class CodeGen:
         prompt = f"""You are a helpful assistant that helps to review code written in {languageId} and apply changes to it if needed.
         If the code is correct you return the code as is. 
         You return a json with the code snippet. You only return the code no explanation.
-        Your return type is json newline must be \\n.
+        Your return type is json.
         Here is the code to be reviewed: {initial_result}\n
         Here is the context of the issue: {context}\n
         Your output format is {{"code":"your code snippet with your changes"}}. Json:"""
