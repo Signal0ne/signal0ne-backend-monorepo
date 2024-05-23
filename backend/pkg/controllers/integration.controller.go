@@ -229,9 +229,18 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
+	if _, err = c.issuesCollection.UpdateOne(ctx,
+		bson.M{"_id": id},
+		bson.M{"$set": bson.M{
+			"codeContext": analysisResponse.Explanation,
+		},
+		}); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":     "Success",
-		"newCode":     analysisResponse.Code,
 		"explanation": analysisResponse.Explanation,
 	})
 }
