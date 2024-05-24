@@ -9,7 +9,6 @@ type CodeSnippetRequest struct {
 }
 
 type CodeSnippetResponse struct {
-	Code        string `json:"code"`
 	Explanation string `json:"explanation"`
 }
 

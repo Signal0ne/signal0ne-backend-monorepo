@@ -25,7 +25,7 @@ func VerifyProTierSubscription(ctx *gin.Context, user models.User, usersCollecti
 	subscriptions := subscription.List(&stripe.SubscriptionListParams{Customer: stripe.String(user.UserCustomerId)})
 	for _, sub := range subscriptions.SubscriptionList().Data {
 		stripeSubscription, _ := subscription.Get(sub.ID, nil)
-		if stripeSubscription.Status == "active" &&
+		if (stripeSubscription.Status == "active" || stripeSubscription.Status == "trialing") &&
 			stripeSubscription.Items.Data[0].Price.Product.ID == user.ProTierProductId {
 			proConfirmed = true
 			break
