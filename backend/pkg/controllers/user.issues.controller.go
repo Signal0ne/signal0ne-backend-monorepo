@@ -384,6 +384,7 @@ func (c *UserIssuesController) RegenerateSolution(ctx *gin.Context) {
 		"predictedSolutionsSummary":      analysisResponse.PredictedSolutions,
 		"issuePredictedSolutionsSources": analysisResponse.Sources,
 		"logSummary":                     analysisResponse.LogSummary,
+		"regenerateCount":                issue.RegenerateCount + 1,
 	}})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

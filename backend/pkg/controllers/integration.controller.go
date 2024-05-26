@@ -124,6 +124,8 @@ func (c *IntegrationController) LogAnalysisTask(ctx *gin.Context) {
 			LogSummary:                "",
 			PredictedSolutionsSummary: "",
 			PredictedSolutionsSources: []string{},
+			RegenerateCount:           0,
+			ViewCount:                 0,
 		})
 
 		data := map[string]any{
