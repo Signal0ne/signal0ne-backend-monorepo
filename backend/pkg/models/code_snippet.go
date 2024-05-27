@@ -10,6 +10,7 @@ type CodeSnippetRequest struct {
 
 type CodeSnippetResponse struct {
 	Explanation string `json:"explanation"`
+	Error       string `json:"error"`
 }
 
 type CodeContextRequest struct {

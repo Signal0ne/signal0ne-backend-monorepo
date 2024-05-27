@@ -1,6 +1,7 @@
 """Module for code snippet generator"""
 import os
 import json
+import tiktoken
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 from utils.utils import parse_json
@@ -9,6 +10,7 @@ class CodeGen:
     """Class for the chat agent."""
     def __init__(self, endpoint):
         load_dotenv()
+        self.endpoint = endpoint
         self.plain_output_llm = ChatOpenAI(
             api_key=os.getenv("OPENAI_API_KEY"),
             model=endpoint,
@@ -28,10 +30,14 @@ class CodeGen:
 
     def gen_code(self, logs, current_code, predicted_solutions, languageId):
         """Generate code snippets from the logs."""
-
         result = {
             "explanation": ""
         }
+
+        if self.__count_tokens(current_code) > 200:
+            result["error"] = "Too long code block! Try to provide a shorter code snippet to fix."
+            return result
+        
         initial_reflection = self.__base_code_matching_issue_reflection(current_code, logs, languageId)
         if bool(initial_reflection["relevant"]):
             context = self.__context_gen(current_code, languageId, logs)
@@ -73,6 +79,10 @@ class CodeGen:
         context = self.__execute(validation_prompt, "plain")
 
         return context
+    
+    def __count_tokens(self, code: str):
+        model_encoding = tiktoken.encoding_for_model(self.endpoint)
+        return len(model_encoding.encode(code))
     
     def __execute(self, formatted_prompt: str, output_format: str = "json"):
         messages = [

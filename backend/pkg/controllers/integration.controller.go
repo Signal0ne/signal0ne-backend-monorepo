@@ -228,6 +228,7 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 	jsonData, _ := json.Marshal(codeSnippetRequest)
 	analysisResponse, err := utils.CallCodeGenAgentService(jsonData)
 	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -241,6 +242,14 @@ func (c *IntegrationController) AddCodeAsContext(ctx *gin.Context) {
 		return
 	}
 
+	if analysisResponse.Error != "" {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message":     "Error",
+			"error":       analysisResponse.Error,
+			"explanation": analysisResponse.Explanation,
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":     "Success",
 		"explanation": analysisResponse.Explanation,

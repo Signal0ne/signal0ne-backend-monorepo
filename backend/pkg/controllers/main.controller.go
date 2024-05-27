@@ -106,7 +106,11 @@ func (c *MainController) WaitlistHandler(ctx *gin.Context) {
 	}
 
 	waitlistQueryResult := c.waitlistCollection.FindOne(ctx, bson.M{"email": waitlistEntry.Email})
-	if waitlistQueryResult.Err() != mongo.ErrNoDocuments {
+	if waitlistQueryResult.Err() == mongo.ErrNoDocuments {
+	} else if waitlistQueryResult.Err() != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": waitlistQueryResult.Err().Error()})
+		return
+	} else {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists in the waitlist"})
 		return
 	}
@@ -114,8 +118,8 @@ func (c *MainController) WaitlistHandler(ctx *gin.Context) {
 	emailObj := e.NewEmail()
 	emailObj.From = c.emailClientData.From
 	emailObj.To = []string{waitlistEntry.Email}
-	emailObj.Subject = "Thank you for joining the waitlist!"
-	emailObj.HTML = []byte(utils.WaitlistEntryConfirmationEmail)
+	emailObj.Subject = "Thank you for signing up to PRO!"
+	emailObj.HTML = []byte(utils.ProSignupEntryConfirmationEmail)
 	err = emailObj.SendWithStartTLS(c.emailClientData.HostAddress, c.emailClientData.AuthData, c.emailClientData.TlsConfig)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "There was an error sending the mail"})
