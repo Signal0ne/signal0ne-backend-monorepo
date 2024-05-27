@@ -384,7 +384,7 @@ var ProSignupEntryConfirmationEmail = `
 								<div style="font-family:Poppins, Arial;font-size:16px;font-weight:700;line-height:21px;text-align:left;color:#002A41;">
 									<h2>Hello</h2>
 									<p style="color:#667085; font-weight: 400">
-										We will reach out to you with onboarding instructions to Signal0ne PRO as soon as possible. Thanks for your patience.
+										We will reach out to you with onboarding instructions to Signal0ne PRO as soon as possible. Thank you for your patience.
 									</p>
 									<p style="color:#667085; font-weight: 400; margin-top: 40px">Thank you,<br>
 										Signal0ne Team</p>
