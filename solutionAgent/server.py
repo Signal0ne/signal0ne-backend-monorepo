@@ -23,7 +23,7 @@ app = FastAPI()
 dotenv.load_dotenv()
 
 @app.post("/run_analysis")
-async def run_chat_agent(data: LogData):
+def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
     retries = 0
     if data.isUserPro:
@@ -44,7 +44,7 @@ async def run_chat_agent(data: LogData):
             print(f"Unable to process the logs, error: {e} ... retrying")
         
 @app.post("/generate_code_snippet")
-async def generate_code_snippet(data: CodeSnippetGen):
+def generate_code_snippet(data: CodeSnippetGen):
     if not data.isUserPro:
         return ""
     dotenv.load_dotenv()
