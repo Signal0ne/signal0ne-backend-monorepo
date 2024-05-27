@@ -1,3 +1,4 @@
+from multiprocessing import Manager, Value, Lock
 import os
 import json
 import requests
@@ -5,6 +6,7 @@ import dotenv
 from websearch.scrape import WebScraper
 import nltk
 import torch
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class GoogleCustomSearch:
     """A class to perform Google Custom Search API queries and
@@ -25,6 +27,7 @@ class GoogleCustomSearch:
 
     def generate_summary(self, text, max_input_length=1024, max_output_length=512):
         """Generate a summary of the given text using the model."""
+        print("Generating summary...")
         device = "cuda" if torch.cuda.is_available() else "cpu"
         inputs = self.tokenizer(
             text,
@@ -78,11 +81,14 @@ class GoogleCustomSearch:
     def run_search(self, queries):
         """Run a search query and return the search results with summaries."""
         results = []
-        global_index = 1
-        for query in queries['queries']:
-            query = query['question']
-            data = self.search(query)
+        global_index = Value('i', 1)  # Use Value for shared index
+        lock = Lock()  # Use Lock to synchronize access to the shared index
+
+        def process_query(query):
+            """Helper function to process a single query."""
+            local_results = []
             try:
+                data = self.search(query)
                 if 'items' not in data:
                     query = data.get('spelling', {}).get('correctedQuery', query)
                     data = self.search(query)
@@ -90,11 +96,24 @@ class GoogleCustomSearch:
                     url = item['link']
                     snippet = item['snippet']
                     summary = self.fetch_summary(url)
-                    results.append({'index': global_index, 'url': url, 'snippet': snippet, 'summary': summary})
-                    global_index += 1
+                    with lock:
+                        index = global_index.value
+                        global_index.value += 1
+                    local_results.append({'index': index, 'url': url, 'snippet': snippet, 'summary': summary})
             except Exception as e:
-                print(f"Error processing: {data}")
                 print(f"Error processing search results: {e}")
-                results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
-                global_index += 1
+                with lock:
+                    index = global_index.value
+                    global_index.value += 1
+                local_results.append({'index': index, 'url': "", 'snippet': "", 'summary': ""})
+            return local_results
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(process_query, query['question']) for query in queries['queries']]
+            for future in as_completed(futures):
+                results.extend(future.result())
+
+        # Sort results by their index to maintain the original order
+        results.sort(key=lambda x: x['index'])
+        print(json.dumps(results, indent=4))
         return json.dumps(results, indent=4)
