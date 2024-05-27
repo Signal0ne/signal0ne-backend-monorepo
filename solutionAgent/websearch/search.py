@@ -1,5 +1,3 @@
-"""A module to perform Google Custom Search API queries
-and fetch summaries of the search results."""
 import os
 import json
 import requests
@@ -11,17 +9,19 @@ import torch
 class GoogleCustomSearch:
     """A class to perform Google Custom Search API queries and
     fetch summaries of the search results."""
-    def __init__(self, model,tokenizer):
+    def __init__(self, model, tokenizer):
         nltk.download('punkt')
         dotenv.load_dotenv()
-        api_key = os.getenv('GOOGLE_API_KEY')
-        cse_id = os.getenv('GOOGLE_CSE_ID')
-        self.api_key = api_key
-        self.cse_id = cse_id
+        self.api_key = os.getenv('GOOGLE_API_KEY')
+        self.cse_id = os.getenv('GOOGLE_CSE_ID')
         self.base_url = "https://www.googleapis.com/customsearch/v1"
         self.num_results = 3
         self.model = model
         self.tokenizer = tokenizer
+        self.session = requests.Session()  # Create a session
+
+    def __del__(self):
+        self.session.close()  # Ensure the session is closed when the object is destroyed
 
     def generate_summary(self, text, max_input_length=1024, max_output_length=512):
         """Generate a summary of the given text using the model."""
@@ -36,8 +36,8 @@ class GoogleCustomSearch:
         input_ids = inputs.input_ids.to(device)
         attention_mask = inputs.attention_mask.to(device)
 
-        with torch.no_grad(): 
-            outputs =self.model.generate(
+        with torch.no_grad():
+            outputs = self.model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_length=max_output_length,
@@ -61,13 +61,13 @@ class GoogleCustomSearch:
     def search(self, query, **kwargs):
         """Perform a Google Custom Search API query and return the results."""
         payload = self.build_payload(query, **kwargs)
-        response = requests.get(self.base_url, params=payload, timeout=10)
+        response = self.session.get(self.base_url, params=payload, timeout=10)
         return response.json()
 
     def fetch_summary(self, url):
         """Fetch the summary of an article from the given URL."""
         try:
-            webScrape = WebScraper(url)
+            webScrape = WebScraper(url,self.session)
             text = webScrape.get_text()
             summary = self.generate_summary(text)
             return summary
@@ -84,9 +84,9 @@ class GoogleCustomSearch:
             data = self.search(query)
             try:
                 if 'items' not in data:
-                    query = data['spelling']['correctedQuery']
+                    query = data.get('spelling', {}).get('correctedQuery', query)
                     data = self.search(query)
-                for item in data['items']:
+                for item in data.get('items', []):
                     url = item['link']
                     snippet = item['snippet']
                     summary = self.fetch_summary(url)

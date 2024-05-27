@@ -6,11 +6,11 @@ from stackapi import StackAPI, StackAPIError
 
 class WebScraper:
     """A class to scrape the text content of a web page."""
-    def __init__(self, url):
+    def __init__(self, url, session=None):
         self.url = url
         self.page_content = None
         self.soup = None
-        self.session = requests.Session()
+        self.session = session
         self.STACKOVERFLOW_SITE = StackAPI('stackoverflow', key=os.getenv("STACKOVERFLOW_API_KEY"))
         self._fetch_page()
 
