@@ -106,7 +106,7 @@ func (c *MainController) WaitlistHandler(ctx *gin.Context) {
 	}
 
 	waitlistQueryResult := c.waitlistCollection.FindOne(ctx, bson.M{"email": waitlistEntry.Email})
-	if waitlistQueryResult.Err() == mongo.ErrNoDocuments {
+	if waitlistQueryResult.Err() != mongo.ErrNoDocuments {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists in the waitlist"})
 		return
 	}
