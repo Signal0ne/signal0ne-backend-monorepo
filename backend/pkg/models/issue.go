@@ -41,6 +41,7 @@ type Issue struct {
 	LogSummary                string    `json:"logSummary" bson:"logSummary"`
 	PredictedSolutionsSummary string    `json:"predictedSolutionsSummary" bson:"predictedSolutionsSummary"`
 	PredictedSolutionsSources []string  `json:"issuePredictedSolutionsSources" bson:"issuePredictedSolutionsSources"`
+	RegenerateCount           int32     `json:"regenerateCount" bson:"regenerateCount"`
 	ViewCount                 int32     `json:"viewCount" bson:"viewCount"`
 	CopiedSourcesLinksCount   int32     `json:"copiedSourcesLinksCount" bson:"copiedSourcesLinksCount"`
 }
