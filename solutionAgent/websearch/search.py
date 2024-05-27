@@ -2,16 +2,16 @@
 and fetch summaries of the search results."""
 import os
 import json
-from newspaper.configuration import Configuration
 import requests
 import dotenv
-from newspaper import Article
+from websearch.scrape import WebScraper
 import nltk
+import torch
 
 class GoogleCustomSearch:
     """A class to perform Google Custom Search API queries and
     fetch summaries of the search results."""
-    def __init__(self, model_pipeline):
+    def __init__(self, model,tokenizer):
         nltk.download('punkt')
         dotenv.load_dotenv()
         api_key = os.getenv('GOOGLE_API_KEY')
@@ -20,8 +20,32 @@ class GoogleCustomSearch:
         self.cse_id = cse_id
         self.base_url = "https://www.googleapis.com/customsearch/v1"
         self.num_results = 3
-        self.model_pipeline = model_pipeline
-    
+        self.model = model
+        self.tokenizer = tokenizer
+
+    def generate_summary(self, text, max_input_length=1024, max_output_length=512):
+        """Generate a summary of the given text using the model."""
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        inputs = self.tokenizer(
+            text,
+            max_length=max_input_length,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        )
+        input_ids = inputs.input_ids.to(device)
+        attention_mask = inputs.attention_mask.to(device)
+
+        with torch.no_grad(): 
+            outputs =self.model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                max_length=max_output_length,
+                num_beams=4,
+                early_stopping=True
+            )
+        summary = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return summary   
 
     def build_payload(self, query, **kwargs):
         """Build the payload for the Google Custom Search API query."""
@@ -43,17 +67,10 @@ class GoogleCustomSearch:
     def fetch_summary(self, url):
         """Fetch the summary of an article from the given URL."""
         try:
-            config = Configuration()
-            config.browser_user_agent = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) '
-                                         'AppleWebKit/537.36 (KHTML, like Gecko) '
-                                         'Chrome/97.0.4692.99 Safari/537.36')
-            article = Article(url, config=config)
-            article.download()
-            article.parse()
-            article.nlp()
-            
-            summary = self.model_pipeline(article.text, max_length=500, min_length=200, do_sample=False)
-            return summary[0]['summary_text']
+            webScrape = WebScraper(url)
+            text = webScrape.get_text()
+            summary = self.generate_summary(text)
+            return summary
         except Exception as e:
             print(f"Error fetching summary: {e}")
             return ""
@@ -81,13 +98,3 @@ class GoogleCustomSearch:
                 results.append({'index': global_index, 'url': "", 'snippet': "", 'summary': ""})
                 global_index += 1
         return json.dumps(results, indent=4)
-    
-if __name__ == "__main__":
-        search = GoogleCustomSearch()
-        queries = {
-            "queries": [
-                {"question": "MySQL Server Failure: Corrupted InnoDB Plugin and Datafile Issues"},
-            ]
-        }
-        results = search.run_search(queries)
-        print(results)
