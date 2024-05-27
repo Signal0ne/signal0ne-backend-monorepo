@@ -115,5 +115,4 @@ class GoogleCustomSearch:
 
         # Sort results by their index to maintain the original order
         results.sort(key=lambda x: x['index'])
-        print(json.dumps(results, indent=4))
         return json.dumps(results, indent=4)
