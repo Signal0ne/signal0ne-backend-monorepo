@@ -46,7 +46,9 @@ def run_chat_agent(data: LogData):
 @app.post("/generate_code_snippet")
 def generate_code_snippet(data: CodeSnippetGen):
     if not data.isUserPro:
-        return ""
+        return {
+            "error": "You must have a pro account to access this feature."
+        }
     dotenv.load_dotenv()
     chat_agent = CodeGen(os.getenv('CODE_TIER1_MODEL_ENDPOINT'))
     result = chat_agent.gen_code(data.logs, data.currentCodeSnippet, data.predictedSolutions, data.languageId)
