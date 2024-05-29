@@ -47,7 +47,7 @@ def run_chat_agent(data: LogData):
 def generate_code_snippet(data: CodeSnippetGen):
     if not data.isUserPro:
         return {
-            "error": "You must have a pro account to access this feature."
+            "error": "You must have a pro account to access this feature. Check out [Pro](https://signaloneai.com/#pro) to know more."
         }
     dotenv.load_dotenv()
     chat_agent = CodeGen(os.getenv('CODE_TIER1_MODEL_ENDPOINT'))
