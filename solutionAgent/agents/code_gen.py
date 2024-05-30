@@ -33,7 +33,6 @@ class CodeGen:
         result = {
             "explanation": ""
         }
-
         if self.__count_tokens(current_code) > 200:
             result["error"] = "Too long code block! Try to provide a shorter code snippet to fix."
             return result
@@ -45,6 +44,7 @@ class CodeGen:
             result = json.dumps(result)
             return json.loads(result)
         else:
+            result["error"] = "Ups. Code block doesn't seem to be relevant to this issue try to choose other code block to fix."
             return result
     
     def __base_code_matching_issue_reflection(self, current_code, logs, languageId):
