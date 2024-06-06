@@ -1,6 +1,5 @@
 """Module for AnswerGenerator class"""
 import os
-from langchain_community.llms import HuggingFaceEndpoint
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_openai.llms import OpenAI

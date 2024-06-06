@@ -11,6 +11,7 @@ class LogData(BaseModel):
     '''Class for the log data'''
     logs: str
     isUserPro: bool
+    use_newspaper: bool
 
 class CodeSnippetGen(BaseModel):
     '''Class for the code snippet generation'''
@@ -34,10 +35,10 @@ async def run_chat_agent(data: LogData):
     '''Function to run the chat agent'''
     retries = 0
     if data.isUserPro:
-        chat_agent = GraphGen(model,tokenizer,os.getenv('TIER2_MODEL_ENDPOINT'), tier=2)
+        chat_agent = GraphGen(model,tokenizer,os.getenv('TIER2_MODEL_ENDPOINT'), data.use_newspaper, tier=2)
     else:
         print("Running tier 1 model")
-        chat_agent = GraphGen(model,tokenizer,os.getenv('TIER1_MODEL_ENDPOINT'))
+        chat_agent = GraphGen(model,tokenizer,os.getenv('TIER1_MODEL_ENDPOINT'),data.use_newspaper)
     while True:
         try:
             retries = retries + 1

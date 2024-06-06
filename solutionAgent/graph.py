@@ -13,12 +13,13 @@ from agents.log_filterer import LogFilterer
 
 class GraphGen:
     """Class for the solution agent."""
-    def __init__(self, model,tokenizer, endpoint_url: str, tier: int = 1):
+    def __init__(self, model,tokenizer, endpoint_url: str, use_newspaper=False , tier: int = 1):
         load_dotenv()
         self.endpoint_url = endpoint_url
         self.tier = tier
         self.model = model
         self.tokenizer = tokenizer
+        self.use_newspaper = use_newspaper
         self.load_agents()
 
     def load_agents(self):
@@ -26,7 +27,7 @@ class GraphGen:
         self.log_filterer = LogFilterer(self.endpoint_url, self.tier)
         self.title_generator = TitleGen(self.endpoint_url, self.tier)
         self.query_generator = QueryGen(self.endpoint_url, self.tier)
-        self.search = GoogleCustomSearch(self.model, self.tokenizer)
+        self.search = GoogleCustomSearch(self.model, self.tokenizer, self.use_newspaper)
         self.ranker = Ranker(self.endpoint_url, self.tier)
         self.answer_generator = AnswerGenerator(self.endpoint_url, self.tier)
 

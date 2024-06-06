@@ -27,7 +27,8 @@ if not os.path.exists(test_output_dir_name):
 for log in logset:
     data = {
         "logs": log,
-        "isUserPro": False
+        "isUserPro": False,
+        "use_newspaper": True
     }
     response = None
     start_time = time.time()

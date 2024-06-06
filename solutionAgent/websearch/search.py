@@ -7,11 +7,12 @@ from websearch.scrape import WebScraper
 import nltk
 import torch
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from newspaper import Article
 
 class GoogleCustomSearch:
     """A class to perform Google Custom Search API queries and
     fetch summaries of the search results."""
-    def __init__(self, model, tokenizer):
+    def __init__(self, model, tokenizer, use_newspaper):
         nltk.download('punkt')
         dotenv.load_dotenv()
         self.api_key = os.getenv('GOOGLE_API_KEY')
@@ -20,6 +21,7 @@ class GoogleCustomSearch:
         self.num_results = 3
         self.model = model
         self.tokenizer = tokenizer
+        self.use_newspaper = use_newspaper
         self.session = requests.Session()  # Create a session
 
     def __del__(self):
@@ -70,9 +72,16 @@ class GoogleCustomSearch:
     def fetch_summary(self, url):
         """Fetch the summary of an article from the given URL."""
         try:
-            webScrape = WebScraper(url,self.session)
-            text = webScrape.get_text()
-            summary = self.generate_summary(text)
+            if self.use_newspaper:
+                article = Article(url)
+                article.download()
+                article.parse()
+                article.nlp()
+                summary = article.summary
+            else:
+                webScrape = WebScraper(url, self.session)
+                text = webScrape.get_text()
+                summary = self.generate_summary(text)
             return summary
         except Exception as e:
             print(f"Error fetching summary: {e}")
@@ -105,10 +114,11 @@ class GoogleCustomSearch:
                 with lock:
                     index = global_index.value
                     global_index.value += 1
+
                 local_results.append({'index': index, 'url': "", 'snippet': "", 'summary': ""})
             return local_results
 
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             futures = [executor.submit(process_query, query['question']) for query in queries['queries']]
             for future in as_completed(futures):
                 results.extend(future.result())
