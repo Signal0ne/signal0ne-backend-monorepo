@@ -17,6 +17,10 @@ services:
         - 8081:8081
       volumes:
         - ../solutionAgent:/app
+      environment:
+        - OTEL_SERVICE_NAME=ai-agent
+        - OTEL_EXPORTER_OTLP_ENDPOINT=http://backend-jager-1:4318
+        - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf
       
   mongo-db:
       container_name: mongo-db
@@ -25,3 +29,12 @@ services:
         - 27017:27017
       volumes:
         - ./mongo-data:/data/db
+
+  #DO NOT REMOVE, USED FOR PROMPT TACRING PURPOSES
+  # jager:
+  #   image: 'jaegertracing/all-in-one:latest'
+  #   ports:
+  #     - 16686:16686
+  #     - 14268:14268
+  #     - 4317:4317
+  #     - 4318:4318
