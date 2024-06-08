@@ -3,6 +3,7 @@ services:
 
   backend:
     image: '322456/signalonebackend:dev'
+    restart: on-failure
     ports:
       - 443:443
       - 80:80
@@ -13,5 +14,6 @@ services:
 
   solutions-agent:
       image: '322456/solutions-agent:dev'
+      restart: on-failure
       ports:
         - 8081:8081

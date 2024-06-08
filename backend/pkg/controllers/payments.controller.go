@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	e "github.com/jordan-wright/email"
 	"github.com/stripe/stripe-go/v76"
 	billingPortal "github.com/stripe/stripe-go/v76/billingportal/session"
 	"github.com/stripe/stripe-go/v76/checkout/session"
@@ -18,14 +19,19 @@ import (
 )
 
 type PaymentController struct {
+	emailClientData    EmailClientConfig
 	paymentsCollection *mongo.Collection
 	usersCollection    *mongo.Collection
 }
 
-func NewPaymentController(paymentsCollection *mongo.Collection, usersCollection *mongo.Collection) *PaymentController {
+func NewPaymentController(paymentsCollection *mongo.Collection,
+	usersCollection *mongo.Collection,
+	emailClientData EmailClientConfig,
+) *PaymentController {
 	return &PaymentController{
 		paymentsCollection: paymentsCollection,
 		usersCollection:    usersCollection,
+		emailClientData:    emailClientData,
 	}
 }
 
@@ -131,6 +137,13 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"descriptionKey": "VERSION_UPGRADE_ERROR"})
 		return
 	}
+
+	emailObj := e.NewEmail()
+	emailObj.From = pc.emailClientData.From
+	emailObj.To = []string{successfulCheckoutSession.Customer.Email}
+	emailObj.Subject = "Take the most out of SignalOne PRO!"
+	emailObj.HTML = []byte(utils.ProOnboardingEmail)
+	_ = emailObj.SendWithStartTLS(pc.emailClientData.HostAddress, pc.emailClientData.AuthData, pc.emailClientData.TlsConfig)
 
 	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 		bson.M{"$set": bson.M{

@@ -30,10 +30,11 @@ services:
       volumes:
         - ./mongo-data:/data/db
 
-  jager:
-    image: 'jaegertracing/all-in-one:latest'
-    ports:
-      - 16686:16686
-      - 14268:14268
-      - 4317:4317
-      - 4318:4318
+  #DO NOT REMOVE, USED FOR PROMPT TACRING PURPOSES
+  # jager:
+  #   image: 'jaegertracing/all-in-one:latest'
+  #   ports:
+  #     - 16686:16686
+  #     - 14268:14268
+  #     - 4317:4317
+  #     - 4318:4318
