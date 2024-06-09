@@ -12,6 +12,9 @@ import (
 )
 
 func HandleStripeCustomer(customerId string) (*stripe.Customer, error) {
+	if customerId == "" {
+		return nil, nil
+	}
 	stripeCustomer, err := customer.Get(customerId, &stripe.CustomerParams{})
 	if err != nil {
 		return nil, err

@@ -140,10 +140,13 @@ func (pc *PaymentController) StripeCheckoutCompleteHandler(ctx *gin.Context) {
 
 	emailObj := e.NewEmail()
 	emailObj.From = pc.emailClientData.From
-	emailObj.To = []string{successfulCheckoutSession.Customer.Email}
+	emailObj.To = []string{successfulCheckoutSession.CustomerEmail}
 	emailObj.Subject = "Take the most out of SignalOne PRO!"
 	emailObj.HTML = []byte(utils.ProOnboardingEmail)
-	_ = emailObj.SendWithStartTLS(pc.emailClientData.HostAddress, pc.emailClientData.AuthData, pc.emailClientData.TlsConfig)
+	err = emailObj.SendWithStartTLS(pc.emailClientData.HostAddress, pc.emailClientData.AuthData, pc.emailClientData.TlsConfig)
+	if err != nil {
+		fmt.Printf("[ERROR] error sending email: %v", err)
+	}
 
 	pc.usersCollection.UpdateOne(ctx, bson.M{"userId": user.UserId},
 		bson.M{"$set": bson.M{
