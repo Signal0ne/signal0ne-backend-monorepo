@@ -241,7 +241,7 @@ var WaitlistEntryConfirmationEmail = `
 </html>
 `
 
-var ProSignupEntryConfirmationEmail = `
+var Signal0neInterestConfirmationEmail = `
 <!doctype html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
   xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -384,7 +384,7 @@ var ProSignupEntryConfirmationEmail = `
 								<div style="font-family:Poppins, Arial;font-size:16px;font-weight:700;line-height:21px;text-align:left;color:#002A41;">
 									<h2>Hello</h2>
 									<p style="color:#667085; font-weight: 400">
-										We will reach out to you with onboarding instructions to Signal0ne PRO as soon as possible. Thank you for your patience.
+										We will reach out to you to understand your needs and expectations from Signal0ne as soon as possible.
 									</p>
 									<p style="color:#667085; font-weight: 400; margin-top: 40px">Thank you,<br>
 										Signal0ne Team</p>
