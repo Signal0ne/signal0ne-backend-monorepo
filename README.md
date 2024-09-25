@@ -6,6 +6,10 @@ Signal0ne docker extension is a tool for debugging and monitoring containerized 
 ## Demo video
 [![YouTube](http://i.ytimg.com/vi/DYkBbBCSm1Y/hqdefault.jpg)](https://www.youtube.com/watch?v=DYkBbBCSm1Y)
 
+[VsCode Extension](https://github.com/Signal0ne/signal0ne-vscode-extension)
+
+[Docker Extension](https://github.com/Signal0ne/signal0ne-docker-extension)
+
 ## How to use locally
 
 ### Prerequisites
